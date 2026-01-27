@@ -27,6 +27,8 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 > - [**ProtonVPN**](https://protonvpn.tomspark.tech/) - 3 months FREE!
 > - [**Surfshark**](https://surfshark.tomspark.tech/) - 3 extra months FREE!
 
+> **Just want a torrent client?** Check out [**OneShotTorrent**](https://github.com/loponai/oneshottorrent) - a simpler VPN-protected qBittorrent setup without the *arr automation.
+
 ---
 
 ## Features
