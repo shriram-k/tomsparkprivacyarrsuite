@@ -431,15 +431,24 @@ function Show-SetupGuide {
     Write-Host "  SETUP GUIDE: qBittorrent (Step 1 of 4)" -ForegroundColor Magenta
     Write-Host "  --------------------------------------" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  Opening qBittorrent..." -ForegroundColor White
+    Write-Host "  Press ENTER to open qBittorrent in your browser..." -ForegroundColor Yellow
+    Read-Host | Out-Null
     Start-Process "http://localhost:8080"
     Write-Host ""
-    Write-Host "  Default Login:" -ForegroundColor Yellow
-    Write-Host "    Username: admin" -ForegroundColor White
-    Write-Host "    Password: adminadmin" -ForegroundColor White
+    Write-Host "  Login:" -ForegroundColor Yellow
+    Write-Host "    Username: " -ForegroundColor White -NoNewline
+    Write-Host "admin" -ForegroundColor Cyan
+    Write-Host "    Password: " -ForegroundColor White -NoNewline
+    Write-Host "(check the command below)" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  If that doesn't work, run this command to find the password:" -ForegroundColor Gray
+    Write-Host "  " -NoNewline
+    Write-Host " IMPORTANT " -BackgroundColor DarkRed -ForegroundColor White
+    Write-Host "  qBittorrent generates a random password on first run." -ForegroundColor White
+    Write-Host "  Open a NEW terminal and run this command to find it:" -ForegroundColor White
+    Write-Host ""
     Write-Host "    docker logs qbittorrent 2>&1 | findstr password" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Copy the password shown, then log in and change it." -ForegroundColor Gray
     Write-Host ""
     Write-Host "  " -NoNewline
     Write-Host " VPN VERIFICATION " -BackgroundColor DarkGreen -ForegroundColor White
@@ -455,7 +464,8 @@ function Show-SetupGuide {
     Write-Host "  SETUP GUIDE: Prowlarr (Step 2 of 4)" -ForegroundColor Magenta
     Write-Host "  -----------------------------------" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  Opening Prowlarr..." -ForegroundColor White
+    Write-Host "  Press ENTER to open Prowlarr in your browser..." -ForegroundColor Yellow
+    Read-Host | Out-Null
     Start-Process "http://localhost:8181"
     Write-Host ""
     Write-Host "  " -NoNewline
@@ -480,7 +490,8 @@ function Show-SetupGuide {
     Write-Host "  SETUP GUIDE: Sonarr (Step 3 of 4)" -ForegroundColor Magenta
     Write-Host "  ---------------------------------" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  Opening Sonarr..." -ForegroundColor White
+    Write-Host "  Press ENTER to open Sonarr in your browser..." -ForegroundColor Yellow
+    Read-Host | Out-Null
     Start-Process "http://localhost:8989"
     Write-Host ""
     Write-Host "  1. Create your admin account when prompted" -ForegroundColor White
@@ -509,7 +520,8 @@ function Show-SetupGuide {
     Write-Host "  SETUP GUIDE: Radarr (Step 4 of 4)" -ForegroundColor Magenta
     Write-Host "  ---------------------------------" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  Opening Radarr..." -ForegroundColor White
+    Write-Host "  Press ENTER to open Radarr in your browser..." -ForegroundColor Yellow
+    Read-Host | Out-Null
     Start-Process "http://localhost:7878"
     Write-Host ""
     Write-Host "  1. Create your admin account when prompted" -ForegroundColor White
@@ -535,7 +547,8 @@ function Show-SetupGuide {
     Write-Host "  FINAL STEP: Connect Prowlarr to Apps" -ForegroundColor Magenta
     Write-Host "  ------------------------------------" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  Opening Prowlarr..." -ForegroundColor White
+    Write-Host "  Press ENTER to open Prowlarr in your browser..." -ForegroundColor Yellow
+    Read-Host | Out-Null
     Start-Process "http://localhost:8181"
     Write-Host ""
     Write-Host "  Go to: Settings > Apps" -ForegroundColor Yellow

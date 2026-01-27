@@ -85,10 +85,14 @@ docker ps
 - Change the Language filter from "en-US" to "Any"
 - Most indexers are tagged as "English" not "en-US"
 
-### qBittorrent Password Not Working
+### qBittorrent Password
+qBittorrent generates a **random password** on first run (not admin/adminadmin anymore).
+
+Find it with:
 ```bash
 docker logs qbittorrent 2>&1 | findstr password
 ```
+Username is `admin`. Change the password after logging in.
 
 ## Architecture
 
