@@ -462,11 +462,22 @@ function Show-SetupGuide {
     Write-Host "  " -NoNewline
     Write-Host " IMPORTANT " -BackgroundColor DarkRed -ForegroundColor White
     Write-Host "  qBittorrent generates a random password on first run." -ForegroundColor White
-    Write-Host "  Open a NEW terminal and run this command to find it:" -ForegroundColor White
     Write-Host ""
-    Write-Host "    docker logs qbittorrent 2>&1 | findstr password" -ForegroundColor Cyan
+    Write-Host "  To find your password:" -ForegroundColor Yellow
+    Write-Host "    1. Press " -ForegroundColor White -NoNewline
+    Write-Host "Windows + R" -ForegroundColor Cyan -NoNewline
+    Write-Host ", type " -ForegroundColor White -NoNewline
+    Write-Host "cmd" -ForegroundColor Cyan -NoNewline
+    Write-Host ", press Enter" -ForegroundColor White
+    Write-Host "    2. In the black window, paste this command:" -ForegroundColor White
     Write-Host ""
-    Write-Host "  Copy the password shown, then log in and change it." -ForegroundColor Gray
+    Write-Host "       docker logs qbittorrent 2>&1 | findstr password" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "    3. Press Enter - your password will appear" -ForegroundColor White
+    Write-Host "    4. Copy the password and use it to log in above" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  After logging in, change your password:" -ForegroundColor Yellow
+    Write-Host "    Tools > Options > Web UI > Password" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  " -NoNewline
     Write-Host " VPN VERIFICATION " -BackgroundColor DarkGreen -ForegroundColor White
