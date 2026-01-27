@@ -28,7 +28,7 @@ A setup script that automatically deploys a complete *arr stack (Sonarr, Radarr,
 - **Windows 10/11**: [Docker Desktop](https://www.docker.com/products/docker-desktop/) with WSL 2
 - **macOS**: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - **Linux**: [Docker Engine](https://docs.docker.com/engine/install/) (or run `curl -fsSL https://get.docker.com | sh`)
-- [NordVPN subscription](https://nordvpn.tomspark.tech/) - Fastest speeds based on [RealVPNSpeeds.com](https://realvpnspeeds.com)
+- [NordVPN subscription](https://nordvpn.tomspark.tech/) - **4 extra months FREE + discount!** Fastest speeds based on [RealVPNSpeeds.com](https://realvpnspeeds.com)
 
 ## Quick Start
 
@@ -157,7 +157,7 @@ This project is free and open source. If you'd like to support development:
 
 [![NordVPN](https://img.shields.io/badge/Get%20NordVPN-blue?style=for-the-badge&logo=nordvpn)](https://nordvpn.tomspark.tech/)
 
-**[Get NordVPN](https://nordvpn.tomspark.tech/)** - The VPN used in this guide. Fastest speeds based on [RealVPNSpeeds.com](https://realvpnspeeds.com) testing.
+**[Get NordVPN](https://nordvpn.tomspark.tech/)** - **4 extra months FREE + discount!** The VPN used in this guide. Fastest speeds based on [RealVPNSpeeds.com](https://realvpnspeeds.com) testing.
 
 ## Need Help?
 

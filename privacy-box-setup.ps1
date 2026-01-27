@@ -34,7 +34,9 @@ function Write-Banner {
     Write-Host "TOM SPARK" -ForegroundColor Yellow -NoNewline
     Write-Host " | v$script:Version" -ForegroundColor DarkGray
     Write-Host "      YouTube: youtube.com/@TomSparkReviews" -ForegroundColor DarkGray
-    Write-Host "      NordVPN: nordvpn.tomspark.tech" -ForegroundColor DarkGray
+    Write-Host "      Get NordVPN: " -ForegroundColor DarkGray -NoNewline
+    Write-Host "nordvpn.tomspark.tech" -ForegroundColor Cyan -NoNewline
+    Write-Host " (4 extra months free!)" -ForegroundColor Green
     Write-Host "  =====================================================" -ForegroundColor Cyan
     Write-Host "   (c) 2026 Tom Spark. Licensed under MIT+Attribution." -ForegroundColor DarkGray
     Write-Host "   Unauthorized copying without credit = DMCA takedown." -ForegroundColor DarkRed
@@ -731,7 +733,10 @@ function Show-SetupGuide {
     Write-Host "  =============================================" -ForegroundColor Cyan
     Write-Host "  Created by TOM SPARK" -ForegroundColor Yellow
     Write-Host "  Subscribe: youtube.com/@TomSparkReviews" -ForegroundColor White
-    Write-Host "  Get NordVPN: nordvpn.tomspark.tech" -ForegroundColor White
+    Write-Host "  Get NordVPN: " -ForegroundColor White -NoNewline
+    Write-Host "nordvpn.tomspark.tech" -ForegroundColor Cyan
+    Write-Host "  " -NoNewline
+    Write-Host " 4 EXTRA MONTHS FREE + DISCOUNT " -BackgroundColor DarkGreen -ForegroundColor White
     Write-Host "  =============================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Questions? Join the Discord!" -ForegroundColor Yellow
