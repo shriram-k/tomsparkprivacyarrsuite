@@ -671,6 +671,125 @@ show_setup_guide() {
     echo ""
 }
 
+# --- Bonus: Notifiarr Setup ---
+setup_notifiarr() {
+    write_banner
+    echo -e "  ${MAGENTA}BONUS: Discord Notifications with Notifiarr${NC}"
+    echo -e "  ${DARKGRAY}--------------------------------------------${NC}"
+    echo ""
+    echo -e "  ${WHITE}Want Discord notifications when:${NC}"
+    echo -e "    ${GRAY}- A movie/show starts downloading?${NC}"
+    echo -e "    ${GRAY}- Downloads complete?${NC}"
+    echo -e "    ${GRAY}- New episodes are available?${NC}"
+    echo -e "    ${GRAY}- Something goes wrong?${NC}"
+    echo ""
+    echo -e "  ${CYAN}Notifiarr${NC} ${WHITE}sends beautiful notifications to your Discord server!${NC}"
+    echo ""
+
+    if ! ask_yes_no "Would you like to set up Discord notifications?"; then
+        echo ""
+        write_info "Skipping Notifiarr setup. You can enable it later!"
+        echo ""
+        echo -e "  ${GRAY}To enable later, run:${NC}"
+        echo -e "    ${CYAN}docker compose --profile notifications up -d${NC}"
+        return 0
+    fi
+
+    write_banner
+    echo -e "  ${MAGENTA}STEP 1: Create Notifiarr Account${NC}"
+    echo -e "  ${DARKGRAY}--------------------------------${NC}"
+    echo ""
+    echo -e "  ${WHITE}1. Go to ${CYAN}https://notifiarr.com${WHITE} and create a FREE account${NC}"
+    echo -e "  ${WHITE}2. Sign in with Discord (recommended) or email${NC}"
+    echo -e "  ${WHITE}3. Go to your Profile and copy your ${YELLOW}API Key${NC}"
+    echo ""
+
+    if ask_yes_no "Open Notifiarr.com in your browser now?"; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            open "https://notifiarr.com"
+        else
+            xdg-open "https://notifiarr.com" 2>/dev/null || \
+            echo -e "  ${CYAN}Open: https://notifiarr.com${NC}"
+        fi
+        echo ""
+        write_info "Browser opened. Create account, then copy your API Key."
+        press_enter
+    fi
+
+    echo ""
+    echo -ne "  ${YELLOW}Paste your Notifiarr API Key: ${NC}"
+    read -r NOTIFIARR_API_KEY
+
+    if [[ -z "$NOTIFIARR_API_KEY" ]]; then
+        write_error "No API key provided. Skipping Notifiarr."
+        return 1
+    fi
+
+    # Add API key to .env
+    echo "" >> "$SCRIPT_DIR/.env"
+    echo "# --- NOTIFIARR (Discord Notifications) ---" >> "$SCRIPT_DIR/.env"
+    echo "NOTIFIARR_API_KEY=${NOTIFIARR_API_KEY}" >> "$SCRIPT_DIR/.env"
+
+    write_success "API Key saved!"
+    echo ""
+
+    write_step "1" "Starting Notifiarr container..."
+    cd "$SCRIPT_DIR" || exit 1
+    docker compose --profile notifications up -d 2>&1 | sed 's/^/      /'
+
+    echo ""
+    write_success "Notifiarr is running!"
+
+    press_enter
+
+    write_banner
+    echo -e "  ${MAGENTA}STEP 2: Configure Notifiarr${NC}"
+    echo -e "  ${DARKGRAY}---------------------------${NC}"
+    echo ""
+    echo -e "  ${YELLOW}Press ENTER to open Notifiarr in your browser...${NC}"
+    read -r
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "http://localhost:5454"
+    else
+        xdg-open "http://localhost:5454" 2>/dev/null || echo -e "  ${CYAN}Open: http://localhost:5454${NC}"
+    fi
+    echo ""
+    echo -e "  ${WHITE} LOGIN ${NC}"
+    echo -e "    ${WHITE}Username: ${CYAN}admin${NC}"
+    echo -e "    ${WHITE}Password: ${CYAN}(your API key)${NC}"
+    echo ""
+    echo -e "  ${WHITE} CONNECT YOUR APPS ${NC}"
+    echo ""
+    echo -e "  ${YELLOW}In Notifiarr web UI:${NC}"
+    echo -e "    ${WHITE}1. Go to 'Starr Apps' in the menu${NC}"
+    echo -e "    ${WHITE}2. Enable Radarr and add:${NC}"
+    echo -e "       ${GRAY}- URL: ${CYAN}http://localhost:7878${NC}"
+    echo -e "       ${GRAY}- API Key: ${CYAN}(from Radarr > Settings > General)${NC}"
+    echo ""
+    echo -e "    ${WHITE}3. Enable Sonarr and add:${NC}"
+    echo -e "       ${GRAY}- URL: ${CYAN}http://localhost:8989${NC}"
+    echo -e "       ${GRAY}- API Key: ${CYAN}(from Sonarr > Settings > General)${NC}"
+    echo ""
+    echo -e "  ${YELLOW}On notifiarr.com website:${NC}"
+    echo -e "    ${WHITE}1. Go to Integrations > Manage${NC}"
+    echo -e "    ${WHITE}2. Enable Radarr/Sonarr integrations${NC}"
+    echo -e "    ${WHITE}3. Set up your Discord channel for notifications${NC}"
+    echo ""
+    echo -e "  ${GREEN}That's it! You'll now get Discord notifications!${NC}"
+
+    press_enter
+
+    write_banner
+    echo -e "  ${GREEN}=============================================${NC}"
+    echo -e "       ${WHITE}NOTIFIARR SETUP COMPLETE!${NC}"
+    echo -e "  ${GREEN}=============================================${NC}"
+    echo ""
+    echo -e "  ${YELLOW}Notifiarr Web UI:${NC} ${CYAN}http://localhost:5454${NC}"
+    echo ""
+    echo -e "  ${WHITE}Configure notifications at: ${CYAN}https://notifiarr.com${NC}"
+    echo ""
+}
+
 # --- Main Execution ---
 main() {
     write_banner
@@ -742,6 +861,7 @@ main() {
     if start_privacy_box; then
         press_enter
         show_setup_guide
+        setup_notifiarr
     else
         echo ""
         write_error "Setup failed. Please check your VPN credentials."

@@ -38,6 +38,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 - **Multi-VPN support** - Works with NordVPN, ProtonVPN, or Surfshark
 - **VPN Kill Switch** - All traffic routed through Gluetun
 - **Jellyfin included** - Stream your media to any device out of the box
+- **Discord notifications** - Optional Notifiarr integration for download alerts
 - **Pre-configured ports** - Avoids common port conflicts
 - **Guided configuration** - Step-by-step instructions for connecting all apps
 - **Safe defaults** - Credentials properly quoted, secure settings enabled
@@ -51,6 +52,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 | Sonarr | `localhost:8989` | TV show manager |
 | Radarr | `localhost:7878` | Movie manager |
 | Jellyfin | `localhost:8096` | Media server (watch on any device!) |
+| Notifiarr | `localhost:5454` | Discord notifications (optional) |
 | Gluetun | - | VPN tunnel (NordVPN/ProtonVPN/Surfshark) |
 
 ## Requirements
@@ -118,6 +120,10 @@ docker logs gluetun
 
 # Check container status
 docker ps
+
+# Enable Notifiarr (Discord notifications)
+# First add NOTIFIARR_API_KEY=your-key to .env, then:
+docker compose --profile notifications up -d
 ```
 
 ## Troubleshooting

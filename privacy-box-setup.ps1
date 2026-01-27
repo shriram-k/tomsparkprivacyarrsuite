@@ -438,6 +438,22 @@ services:
       - ${ROOT_DIR}/media/tv:/data/tvshows
       - ${ROOT_DIR}/media/movies:/data/movies
     restart: always
+
+  # --- Notifications (Optional - enable with: docker compose --profile notifications up -d) ---
+  notifiarr:
+    image: golift/notifiarr
+    container_name: notifiarr
+    hostname: notifiarr
+    profiles:
+      - notifications
+    environment:
+      - DN_API_KEY=${NOTIFIARR_API_KEY}
+      - TZ=${TZ}
+    ports:
+      - 5454:5454   # Notifiarr Web UI
+    volumes:
+      - ${ROOT_DIR}/config/notifiarr:/config
+    restart: always
 '@
 
     $content | Out-File -FilePath "$Path\docker-compose.yml" -Encoding UTF8 -NoNewline
@@ -857,6 +873,133 @@ function Show-SetupGuide {
     Write-Host ""
 }
 
+# --- Bonus: Notifiarr Setup ---
+function Setup-Notifiarr {
+    param([string]$Path)
+
+    Write-Banner
+    Write-Host "  BONUS: Discord Notifications with Notifiarr" -ForegroundColor Magenta
+    Write-Host "  --------------------------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  Want Discord notifications when:" -ForegroundColor White
+    Write-Host "    - A movie/show starts downloading?" -ForegroundColor Gray
+    Write-Host "    - Downloads complete?" -ForegroundColor Gray
+    Write-Host "    - New episodes are available?" -ForegroundColor Gray
+    Write-Host "    - Something goes wrong?" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  Notifiarr" -ForegroundColor Cyan -NoNewline
+    Write-Host " sends beautiful notifications to your Discord server!" -ForegroundColor White
+    Write-Host ""
+
+    if (-not (Ask-YesNo "Would you like to set up Discord notifications?")) {
+        Write-Host ""
+        Write-Info "Skipping Notifiarr setup. You can enable it later!"
+        Write-Host ""
+        Write-Host "  To enable later, run:" -ForegroundColor Gray
+        Write-Host "    docker compose --profile notifications up -d" -ForegroundColor Cyan
+        return
+    }
+
+    Write-Banner
+    Write-Host "  STEP 1: Create Notifiarr Account" -ForegroundColor Magenta
+    Write-Host "  --------------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  1. Go to " -ForegroundColor White -NoNewline
+    Write-Host "https://notifiarr.com" -ForegroundColor Cyan -NoNewline
+    Write-Host " and create a FREE account" -ForegroundColor White
+    Write-Host "  2. Sign in with Discord (recommended) or email" -ForegroundColor White
+    Write-Host "  3. Go to your Profile and copy your " -ForegroundColor White -NoNewline
+    Write-Host "API Key" -ForegroundColor Yellow
+    Write-Host ""
+
+    if (Ask-YesNo "Open Notifiarr.com in your browser now?") {
+        Start-Process "https://notifiarr.com"
+        Write-Host ""
+        Write-Info "Browser opened. Create account, then copy your API Key."
+        Press-Enter
+    }
+
+    Write-Host ""
+    Write-Host "  Paste your Notifiarr API Key: " -ForegroundColor Yellow -NoNewline
+    $apiKey = Read-Host
+
+    if ([string]::IsNullOrWhiteSpace($apiKey)) {
+        Write-Error-Custom "No API key provided. Skipping Notifiarr."
+        return
+    }
+
+    # Add API key to .env
+    Add-Content -Path "$Path\.env" -Value ""
+    Add-Content -Path "$Path\.env" -Value "# --- NOTIFIARR (Discord Notifications) ---"
+    Add-Content -Path "$Path\.env" -Value "NOTIFIARR_API_KEY=$apiKey"
+
+    Write-Success "API Key saved!"
+    Write-Host ""
+
+    Write-Step "1" "Starting Notifiarr container..."
+    Push-Location $Path
+    docker compose --profile notifications up -d 2>&1 | ForEach-Object { Write-Host "      $_" -ForegroundColor DarkGray }
+    Pop-Location
+
+    Write-Host ""
+    Write-Success "Notifiarr is running!"
+
+    Press-Enter
+
+    Write-Banner
+    Write-Host "  STEP 2: Configure Notifiarr" -ForegroundColor Magenta
+    Write-Host "  ---------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  Press ENTER to open Notifiarr in your browser..." -ForegroundColor Yellow
+    Read-Host | Out-Null
+    Start-Process "http://localhost:5454"
+    Write-Host ""
+    Write-Host "  " -NoNewline
+    Write-Host " LOGIN " -BackgroundColor DarkBlue -ForegroundColor White
+    Write-Host "    Username: " -ForegroundColor White -NoNewline
+    Write-Host "admin" -ForegroundColor Cyan
+    Write-Host "    Password: " -ForegroundColor White -NoNewline
+    Write-Host "(your API key)" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  " -NoNewline
+    Write-Host " CONNECT YOUR APPS " -BackgroundColor DarkBlue -ForegroundColor White
+    Write-Host ""
+    Write-Host "  In Notifiarr web UI:" -ForegroundColor Yellow
+    Write-Host "    1. Go to 'Starr Apps' in the menu" -ForegroundColor White
+    Write-Host "    2. Enable Radarr and add:" -ForegroundColor White
+    Write-Host "       - URL: " -ForegroundColor Gray -NoNewline
+    Write-Host "http://localhost:7878" -ForegroundColor Cyan
+    Write-Host "       - API Key: " -ForegroundColor Gray -NoNewline
+    Write-Host "(from Radarr > Settings > General)" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "    3. Enable Sonarr and add:" -ForegroundColor White
+    Write-Host "       - URL: " -ForegroundColor Gray -NoNewline
+    Write-Host "http://localhost:8989" -ForegroundColor Cyan
+    Write-Host "       - API Key: " -ForegroundColor Gray -NoNewline
+    Write-Host "(from Sonarr > Settings > General)" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  On notifiarr.com website:" -ForegroundColor Yellow
+    Write-Host "    1. Go to Integrations > Manage" -ForegroundColor White
+    Write-Host "    2. Enable Radarr/Sonarr integrations" -ForegroundColor White
+    Write-Host "    3. Set up your Discord channel for notifications" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  That's it! You'll now get Discord notifications!" -ForegroundColor Green
+
+    Press-Enter
+
+    Write-Banner
+    Write-Host "  =============================================" -ForegroundColor Green
+    Write-Host "       NOTIFIARR SETUP COMPLETE!" -ForegroundColor White
+    Write-Host "  =============================================" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "  Notifiarr Web UI: " -ForegroundColor Yellow -NoNewline
+    Write-Host "http://localhost:5454" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Configure notifications at: " -ForegroundColor White -NoNewline
+    Write-Host "https://notifiarr.com" -ForegroundColor Cyan
+    Write-Host ""
+}
+
 # --- Main Execution ---
 function Main {
     Write-Banner
@@ -938,6 +1081,7 @@ function Main {
     if ($success) {
         Press-Enter
         Show-SetupGuide
+        Setup-Notifiarr -Path $InstallPath
     } else {
         Write-Host ""
         Write-Error-Custom "Setup failed. Please check your VPN credentials."

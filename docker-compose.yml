@@ -109,3 +109,20 @@ services:
       - ${ROOT_DIR}/media/tv:/data/tvshows
       - ${ROOT_DIR}/media/movies:/data/movies
     restart: always
+
+  # --- Notifications (Optional - enable with: docker compose --profile notifications up -d) ---
+  notifiarr:
+    image: golift/notifiarr
+    container_name: notifiarr
+    hostname: notifiarr
+    profiles:
+      - notifications
+    environment:
+      - DN_API_KEY=${NOTIFIARR_API_KEY}
+      - TZ=${TZ}
+    ports:
+      - 5454:5454   # Notifiarr Web UI
+    volumes:
+      - ${ROOT_DIR}/config/notifiarr:/config
+      - /var/run/utmp:/var/run/utmp:ro
+    restart: always
