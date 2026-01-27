@@ -36,6 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 - **One-click setup** - No manual file editing required
 - **Cross-platform** - Works on Windows, macOS, and Linux
 - **Multi-VPN support** - Works with NordVPN, ProtonVPN, or Surfshark
+- **OpenVPN & WireGuard** - Choose your protocol (WireGuard for ProtonVPN/Surfshark)
 - **VPN Kill Switch** - All traffic routed through Gluetun
 - **Jellyfin included** - Stream your media to any device out of the box
 - **Discord notifications** - Optional Notifiarr integration for download alerts
@@ -96,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 > You need special "Service Credentials" from your VPN's manual setup area.
 > Using your regular login WILL NOT WORK and causes AUTH_FAILED errors.
 
-**How to get your Service Credentials:**
+### OpenVPN Credentials (Default)
 
 | VPN Provider | Credentials URL |
 |--------------|-----------------|
@@ -105,6 +106,19 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 | **Surfshark** | [my.surfshark.com/vpn/manual-setup/main/openvpn](https://my.surfshark.com/vpn/manual-setup/main/openvpn) |
 
 The credentials look like random alphanumeric strings (e.g., `qVVEf1PqMaXi`) - NOT `yourname@email.com`
+
+### WireGuard Credentials (ProtonVPN & Surfshark only)
+
+WireGuard is a faster, more modern VPN protocol. If you choose WireGuard during setup, you'll need:
+
+| VPN Provider | WireGuard Setup URL |
+|--------------|---------------------|
+| **ProtonVPN** | [account.proton.me/u/0/vpn/WireGuard](https://account.proton.me/u/0/vpn/WireGuard) |
+| **Surfshark** | [my.surfshark.com/vpn/manual-setup/main/wireguard](https://my.surfshark.com/vpn/manual-setup/main/wireguard) |
+
+**What you need from WireGuard config:**
+- **Private Key** - A base64 string (e.g., `yAnz5TF+lXXJte14tji3zlMNq+hd2rYUIgJBgB3fBmk=`)
+- **Address** - Your assigned IP (e.g., `10.2.0.2/32`)
 
 ## Manual Commands
 
@@ -168,12 +182,19 @@ That's it! You'll now get Discord alerts for grabs, downloads, upgrades, and mor
 
 ## Troubleshooting
 
-### AUTH_FAILED Error
+### AUTH_FAILED Error (OpenVPN)
 **This is the #1 most common error!**
 - You're using your VPN email/password instead of Service Credentials
 - Your login email (`you@gmail.com`) will NOT work
 - Go to your VPN provider's manual setup page (see "What You'll Need" above)
 - Copy the **Service Credentials** (random alphanumeric strings, NOT your email)
+
+### WireGuard Connection Failed
+If using WireGuard and the VPN won't connect:
+- Make sure you copied the **Private Key** correctly (it's a long base64 string ending in `=`)
+- Verify the **Address** matches what was shown in your config (e.g., `10.2.0.2/32`)
+- Try generating a new WireGuard configuration from your VPN provider
+- Check that `VPN_TYPE=wireguard` is set in your `.env` file
 
 ### Port Already in Use
 - **Windows:** Hyper-V reserves random ports in the 9000-9999 range
