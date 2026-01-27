@@ -641,6 +641,61 @@ function Show-SetupGuide {
 
     Press-Enter
 
+    # --- Remote Access Setup (Optional) ---
+    Write-Banner
+    Write-Host "  OPTIONAL: Watch Your Media From Anywhere" -ForegroundColor Magenta
+    Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  Want to access your media outside your home (hotel, work, etc.)?" -ForegroundColor White
+    Write-Host "  Use a secure mesh network - NO port forwarding needed!" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  " -NoNewline
+    Write-Host " OPTION 1: NordVPN Meshnet (You already have NordVPN!) " -BackgroundColor DarkGreen -ForegroundColor White
+    Write-Host ""
+    Write-Host "  On this PC:" -ForegroundColor Yellow
+    Write-Host "    1. Install NordVPN app: " -ForegroundColor White -NoNewline
+    Write-Host "https://nordvpn.com/download/" -ForegroundColor Cyan
+    Write-Host "    2. Sign in and go to 'Meshnet' in the left sidebar" -ForegroundColor White
+    Write-Host "    3. Turn ON Meshnet" -ForegroundColor White
+    Write-Host "    4. Note your device's Meshnet name (e.g., my-pc.nord)" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  On your phone/laptop (when away from home):" -ForegroundColor Yellow
+    Write-Host "    1. Install NordVPN app and sign in with same account" -ForegroundColor White
+    Write-Host "    2. Go to Meshnet and turn it ON" -ForegroundColor White
+    Write-Host "    3. Your PC will appear under 'Your devices'" -ForegroundColor White
+    Write-Host "    4. Open Jellyfin/Emby app and connect to:" -ForegroundColor White
+    Write-Host "       " -ForegroundColor White -NoNewline
+    Write-Host "http://your-pc-name.nord:8096" -ForegroundColor Cyan -NoNewline
+    Write-Host " (Jellyfin)" -ForegroundColor Gray
+    Write-Host "       " -ForegroundColor White -NoNewline
+    Write-Host "http://your-pc-name.nord:8920" -ForegroundColor Cyan -NoNewline
+    Write-Host " (Emby)" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  " -NoNewline
+    Write-Host " OPTION 2: Tailscale (Free alternative) " -BackgroundColor DarkBlue -ForegroundColor White
+    Write-Host ""
+    Write-Host "  On this PC:" -ForegroundColor Yellow
+    Write-Host "    1. Download Tailscale: " -ForegroundColor White -NoNewline
+    Write-Host "https://tailscale.com/download" -ForegroundColor Cyan
+    Write-Host "    2. Install and sign in (Google/Microsoft/etc.)" -ForegroundColor White
+    Write-Host "    3. Note your Tailscale IP (starts with 100.x.x.x)" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  On your phone/laptop:" -ForegroundColor Yellow
+    Write-Host "    1. Install Tailscale app and sign in with same account" -ForegroundColor White
+    Write-Host "    2. Open Jellyfin/Emby app and connect to:" -ForegroundColor White
+    Write-Host "       " -ForegroundColor White -NoNewline
+    Write-Host "http://100.x.x.x:8096" -ForegroundColor Cyan -NoNewline
+    Write-Host " (use your actual Tailscale IP)" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  " -NoNewline
+    Write-Host " WHY THIS IS SAFE " -BackgroundColor DarkMagenta -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Both options create an encrypted tunnel directly between your devices." -ForegroundColor Gray
+    Write-Host "  Nothing is exposed to the internet - no hackers can find your server!" -ForegroundColor Gray
+    Write-Host "  This does NOT interfere with your torrent VPN (that runs in Docker)." -ForegroundColor Gray
+
+    Press-Enter
+
     # --- Complete ---
     Write-Banner
     Write-Host ""
