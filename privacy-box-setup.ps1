@@ -249,12 +249,99 @@ function Test-DockerRunning {
 }
 
 # --- VPN Provider Selection ---
+function Get-OtherVPNProvider {
+    Write-Banner
+    Write-Host "  OTHER VPN PROVIDERS" -ForegroundColor Magenta
+    Write-Host "  -------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  Select your VPN provider:" -ForegroundColor White
+    Write-Host ""
+    Write-Host "     1. Mullvad" -ForegroundColor White
+    Write-Host "     2. Private Internet Access (PIA)" -ForegroundColor White
+    Write-Host "     3. Windscribe" -ForegroundColor White
+    Write-Host "     4. CyberGhost" -ForegroundColor White
+    Write-Host "     5. IPVanish" -ForegroundColor White
+    Write-Host "     6. AirVPN" -ForegroundColor White
+    Write-Host "     7. Custom (any Gluetun-supported provider)" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Select (1-7) [default: 1]: " -ForegroundColor Yellow -NoNewline
+    $otherChoice = Read-Host
+
+    switch ($otherChoice) {
+        "2" {
+            return @{
+                Provider = "private internet access"
+                Name = "Private Internet Access"
+                SupportsWireGuard = $true
+            }
+        }
+        "3" {
+            return @{
+                Provider = "windscribe"
+                Name = "Windscribe"
+                SupportsWireGuard = $true
+            }
+        }
+        "4" {
+            return @{
+                Provider = "cyberghost"
+                Name = "CyberGhost"
+                SupportsWireGuard = $true
+            }
+        }
+        "5" {
+            return @{
+                Provider = "ipvanish"
+                Name = "IPVanish"
+                SupportsWireGuard = $false
+                Protocol = "openvpn"
+            }
+        }
+        "6" {
+            return @{
+                Provider = "airvpn"
+                Name = "AirVPN"
+                SupportsWireGuard = $true
+            }
+        }
+        "7" {
+            Write-Host ""
+            Write-Host "  Enter the Gluetun provider name exactly as listed at:" -ForegroundColor White
+            Write-Host "  https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers" -ForegroundColor Cyan
+            Write-Host ""
+            Write-Host "  Provider name: " -ForegroundColor Yellow -NoNewline
+            $providerName = Read-Host
+            Write-Host ""
+            Write-Host "  Does this provider support WireGuard? (Y/N) [default: N]: " -ForegroundColor Yellow -NoNewline
+            $wgResponse = Read-Host
+            $supportsWg = $wgResponse -match "^[Yy]"
+            $result = @{
+                Provider = $providerName
+                Name = $providerName
+                SupportsWireGuard = $supportsWg
+            }
+            if (-not $supportsWg) {
+                $result.Protocol = "openvpn"
+            }
+            return $result
+        }
+        default {
+            return @{
+                Provider = "mullvad"
+                Name = "Mullvad"
+                SupportsWireGuard = $true
+            }
+        }
+    }
+}
+
 function Get-VPNProvider {
     Write-Banner
     Write-Host "  STEP 1: CHOOSE YOUR VPN" -ForegroundColor Magenta
     Write-Host "  -----------------------" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  Which VPN provider do you use?" -ForegroundColor White
+    Write-Host "  RECOMMENDED " -ForegroundColor White -NoNewline
+    Write-Host "(Tested 10+ years for speed & security):" -ForegroundColor Gray
     Write-Host ""
     Write-Host "    1. NordVPN" -ForegroundColor Green -NoNewline
     Write-Host "     - nordvpn.tomspark.tech " -ForegroundColor Gray -NoNewline
@@ -266,7 +353,11 @@ function Get-VPNProvider {
     Write-Host "   - surfshark.tomspark.tech " -ForegroundColor Gray -NoNewline
     Write-Host "(3 extra months FREE!)" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "  Select (1-3) [default: 1]: " -ForegroundColor Yellow -NoNewline
+    Write-Host "  OTHER SUPPORTED VPNs:" -ForegroundColor White
+    Write-Host ""
+    Write-Host "    4. Other VPN provider" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  Select (1-4) [default: 1]: " -ForegroundColor Yellow -NoNewline
     $choice = Read-Host
 
     switch ($choice) {
@@ -287,6 +378,9 @@ function Get-VPNProvider {
                 Bonus = "3 extra months FREE"
                 SupportsWireGuard = $true
             }
+        }
+        "4" {
+            return Get-OtherVPNProvider
         }
         default {
             return @{
@@ -329,26 +423,24 @@ function Get-VPNProtocol {
 
     switch ($choice) {
         "2" {
-            if ($VPN.Provider -eq "protonvpn") {
-                $url = "https://account.proton.me/u/0/vpn/WireGuard"
-            } else {
-                $url = "https://my.surfshark.com/vpn/manual-setup/main/wireguard"
+            $url = $null
+            switch ($VPN.Provider) {
+                "protonvpn" { $url = "https://account.proton.me/u/0/vpn/WireGuard" }
+                "surfshark" { $url = "https://my.surfshark.com/vpn/manual-setup/main/wireguard" }
             }
-            return @{
-                Protocol = "wireguard"
-                URL = $url
-            }
+            $result = @{ Protocol = "wireguard" }
+            if ($url) { $result.URL = $url }
+            return $result
         }
         default {
-            if ($VPN.Provider -eq "protonvpn") {
-                $url = "https://account.proton.me/u/0/vpn/OpenVpnIKEv2"
-            } else {
-                $url = "https://my.surfshark.com/vpn/manual-setup/main/openvpn"
+            $url = $null
+            switch ($VPN.Provider) {
+                "protonvpn" { $url = "https://account.proton.me/u/0/vpn/OpenVpnIKEv2" }
+                "surfshark" { $url = "https://my.surfshark.com/vpn/manual-setup/main/openvpn" }
             }
-            return @{
-                Protocol = "openvpn"
-                URL = $url
-            }
+            $result = @{ Protocol = "openvpn" }
+            if ($url) { $result.URL = $url }
+            return $result
         }
     }
 }
@@ -369,8 +461,15 @@ function Get-VPNCredentials {
         Write-Warning-Custom "You need your WireGuard configuration from $($VPN.Name)"
         Write-Host ""
         Write-Host "  How to get them:" -ForegroundColor White
-        Write-Host "  1. Go to: " -ForegroundColor Gray -NoNewline
-        Write-Host $ProtocolInfo.URL -ForegroundColor Cyan
+        if ($ProtocolInfo.URL) {
+            Write-Host "  1. Go to: " -ForegroundColor Gray -NoNewline
+            Write-Host $ProtocolInfo.URL -ForegroundColor Cyan
+        } else {
+            Write-Host "  1. Log in to your " -ForegroundColor Gray -NoNewline
+            Write-Host $VPN.Name -ForegroundColor White -NoNewline
+            Write-Host " account" -ForegroundColor Gray
+            Write-Host "     Find the manual/service credentials or WireGuard config page" -ForegroundColor Gray
+        }
         Write-Host "  2. Generate a new WireGuard configuration" -ForegroundColor Gray
         Write-Host "  3. You'll need the " -ForegroundColor Gray -NoNewline
         Write-Host "Private Key" -ForegroundColor White -NoNewline
@@ -384,15 +483,20 @@ function Get-VPNCredentials {
         Write-Host "    Address:     " -ForegroundColor Gray -NoNewline
         Write-Host "10.2.0.2/32" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Don't have $($VPN.Name)? Get $($VPN.Bonus)!" -ForegroundColor Green
-        Write-Host "  $($VPN.Affiliate)" -ForegroundColor Cyan
-        Write-Host ""
 
-        if (Ask-YesNo "Open $($VPN.Name) WireGuard page in your browser now?") {
-            Start-Process $ProtocolInfo.URL
+        if ($VPN.Affiliate) {
+            Write-Host "  Don't have $($VPN.Name)? Get $($VPN.Bonus)!" -ForegroundColor Green
+            Write-Host "  $($VPN.Affiliate)" -ForegroundColor Cyan
             Write-Host ""
-            Write-Info "Browser opened. Generate a config, then copy the Private Key and Address."
-            Press-Enter
+        }
+
+        if ($ProtocolInfo.URL) {
+            if (Ask-YesNo "Open $($VPN.Name) WireGuard page in your browser now?") {
+                Start-Process $ProtocolInfo.URL
+                Write-Host ""
+                Write-Info "Browser opened. Generate a config, then copy the Private Key and Address."
+                Press-Enter
+            }
         }
 
         Write-Host ""
@@ -419,20 +523,32 @@ function Get-VPNCredentials {
         Write-Warning-Custom "You need $($VPN.Name) 'Service Credentials' (NOT your email/password!)"
         Write-Host ""
         Write-Host "  How to get them:" -ForegroundColor White
-        Write-Host "  1. Go to: " -ForegroundColor Gray -NoNewline
-        Write-Host $ProtocolInfo.URL -ForegroundColor Cyan
+        if ($ProtocolInfo.URL) {
+            Write-Host "  1. Go to: " -ForegroundColor Gray -NoNewline
+            Write-Host $ProtocolInfo.URL -ForegroundColor Cyan
+        } else {
+            Write-Host "  1. Log in to your " -ForegroundColor Gray -NoNewline
+            Write-Host $VPN.Name -ForegroundColor White -NoNewline
+            Write-Host " account" -ForegroundColor Gray
+            Write-Host "     Find the manual/service credentials or OpenVPN setup page" -ForegroundColor Gray
+        }
         Write-Host "  2. Look for 'Manual Setup' or 'OpenVPN' credentials" -ForegroundColor Gray
         Write-Host "  3. Copy the Username and Password shown there" -ForegroundColor Gray
         Write-Host ""
-        Write-Host "  Don't have $($VPN.Name)? Get $($VPN.Bonus)!" -ForegroundColor Green
-        Write-Host "  $($VPN.Affiliate)" -ForegroundColor Cyan
-        Write-Host ""
 
-        if (Ask-YesNo "Open $($VPN.Name) credential page in your browser now?") {
-            Start-Process $ProtocolInfo.URL
+        if ($VPN.Affiliate) {
+            Write-Host "  Don't have $($VPN.Name)? Get $($VPN.Bonus)!" -ForegroundColor Green
+            Write-Host "  $($VPN.Affiliate)" -ForegroundColor Cyan
             Write-Host ""
-            Write-Info "Browser opened. Copy your credentials, then come back here."
-            Press-Enter
+        }
+
+        if ($ProtocolInfo.URL) {
+            if (Ask-YesNo "Open $($VPN.Name) credential page in your browser now?") {
+                Start-Process $ProtocolInfo.URL
+                Write-Host ""
+                Write-Info "Browser opened. Copy your credentials, then come back here."
+                Press-Enter
+            }
         }
 
         Write-Host ""
@@ -461,7 +577,7 @@ function Get-ServerCountry {
     Write-Host "  -----------------------" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  Pick the closest country to you for best speeds!" -ForegroundColor Yellow
-    Write-Host "  (NordVPN's no-logs policy protects you on ANY server)" -ForegroundColor Gray
+    Write-Host "  (Your VPN's no-logs policy protects you on ANY server)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  Popular choices:" -ForegroundColor White
     Write-Host "    1. United States" -ForegroundColor Gray
@@ -1442,13 +1558,21 @@ browsing stays on your regular connection."
         if ($protocolInfo.Protocol -eq "wireguard") {
             Write-Host "    1. Make sure your WireGuard Private Key is correct" -ForegroundColor White
             Write-Host "    2. Verify your WireGuard Address matches the config" -ForegroundColor White
-            Write-Host "    3. Generate a new config from: " -ForegroundColor White -NoNewline
-            Write-Host $protocolInfo.URL -ForegroundColor Cyan
+            if ($protocolInfo.URL) {
+                Write-Host "    3. Generate a new config from: " -ForegroundColor White -NoNewline
+                Write-Host $protocolInfo.URL -ForegroundColor Cyan
+            } else {
+                Write-Host "    3. Generate a new config from your $($vpn.Name) account" -ForegroundColor White
+            }
         } else {
             Write-Host "    1. Make sure you're using 'Service Credentials' from $($vpn.Name)" -ForegroundColor White
             Write-Host "    2. NOT your email/password login" -ForegroundColor White
-            Write-Host "    3. Get credentials from: " -ForegroundColor White -NoNewline
-            Write-Host $protocolInfo.URL -ForegroundColor Cyan
+            if ($protocolInfo.URL) {
+                Write-Host "    3. Get credentials from: " -ForegroundColor White -NoNewline
+                Write-Host $protocolInfo.URL -ForegroundColor Cyan
+            } else {
+                Write-Host "    3. Get credentials from your $($vpn.Name) account" -ForegroundColor White
+            }
         }
         Write-Host ""
         Write-Host "  To retry, run this script again." -ForegroundColor Gray

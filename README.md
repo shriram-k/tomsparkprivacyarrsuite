@@ -114,7 +114,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 
 - **One-click setup** - No manual file editing required
 - **Cross-platform** - Works on Windows, macOS, and Linux
-- **Multi-VPN support** - Works with NordVPN, ProtonVPN, or Surfshark
+- **Multi-VPN support** - NordVPN, ProtonVPN, Surfshark + Mullvad, PIA, Windscribe, and more
 - **OpenVPN & WireGuard** - Choose your protocol (WireGuard for ProtonVPN/Surfshark)
 - **VPN Kill Switch** - All traffic routed through Gluetun
 - **Jellyfin included** - Stream your media to any device out of the box
@@ -135,7 +135,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 | Jellyfin | `localhost:8096` | Media server (watch on any device!) |
 | Notifiarr | `localhost:5454` | Discord notifications (optional) |
 | FlareSolverr | `localhost:8191` | Cloudflare bypass proxy (optional) |
-| Gluetun | - | VPN tunnel (NordVPN/ProtonVPN/Surfshark) |
+| Gluetun | - | VPN tunnel (NordVPN/ProtonVPN/Surfshark + other providers) |
 
 ## What You'll Need
 
@@ -166,6 +166,10 @@ WireGuard is a faster, more modern VPN protocol. If you choose WireGuard during 
 **What you need from WireGuard config:**
 - **Private Key** - A base64 string (e.g., `yAnz5TF+lXXJte14tji3zlMNq+hd2rYUIgJBgB3fBmk=`)
 - **Address** - Your assigned IP (e.g., `10.2.0.2/32`)
+
+### Other VPN Providers
+
+The setup script also supports **Mullvad**, **Private Internet Access (PIA)**, **Windscribe**, **CyberGhost**, **IPVanish**, **AirVPN**, and any other [Gluetun-supported provider](https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers). Select "Other VPN provider" during setup and follow the prompts. You'll need your provider's service/manual credentials — check your provider's account page for details.
 
 ## Manual Commands
 
@@ -301,7 +305,7 @@ Username is `admin`. Change the password after logging in.
                       ▼
 ┌─────────────────────────────────────────────────────────┐
 │                 GLUETUN (VPN Tunnel)                    │
-│         NordVPN / ProtonVPN / Surfshark                 │
+│       NordVPN / ProtonVPN / Surfshark / Others           │
 │                   Your IP: Hidden                       │
 ├─────────────────────────────────────────────────────────┤
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
