@@ -19,6 +19,7 @@ param(
 
 # --- Configuration ---
 $script:Version = "1.0.0"
+$script:BeginnerMode = $false
 $script:DefaultPorts = @{
     qBittorrent = 8080
     Prowlarr    = 8181  # Safe port (avoids Hyper-V conflicts)
@@ -88,6 +89,125 @@ function Ask-YesNo {
     Write-Host "  $Question (Y/N): " -ForegroundColor Yellow -NoNewline
     $response = Read-Host
     return $response -match "^[Yy]"
+}
+
+# --- Beginner Mode ---
+function Show-BeginnerTip {
+    param(
+        [string]$Title,
+        [string]$Body
+    )
+
+    if (-not $script:BeginnerMode) {
+        return
+    }
+
+    Write-Host ""
+    Write-Host "  +----------------------------------------------------+" -ForegroundColor Cyan
+    Write-Host "  |  " -ForegroundColor Cyan -NoNewline
+    Write-Host "💡 $Title" -ForegroundColor White
+    Write-Host "  +----------------------------------------------------+" -ForegroundColor Cyan
+    $Body -split "`n" | ForEach-Object {
+        Write-Host "  |  " -ForegroundColor Cyan -NoNewline
+        Write-Host $_.Trim() -ForegroundColor Gray
+    }
+    Write-Host "  +----------------------------------------------------+" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Press ENTER to continue..." -ForegroundColor DarkGray
+    Read-Host | Out-Null
+}
+
+function Get-ExperienceLevel {
+    Write-Banner
+    Write-Host "  EXPERIENCE LEVEL" -ForegroundColor Magenta
+    Write-Host "  ----------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  How familiar are you with the ARR suite?" -ForegroundColor White
+    Write-Host ""
+    Write-Host "    1. I'm brand new to ARR" -ForegroundColor Green -NoNewline
+    Write-Host "  (show me extra explanations)" -ForegroundColor Gray
+    Write-Host "    2. I'm familiar with ARR" -ForegroundColor Cyan -NoNewline
+    Write-Host " (skip the intro tips)" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  Select (1-2) [default: 1]: " -ForegroundColor Yellow -NoNewline
+    $choice = Read-Host
+
+    switch ($choice) {
+        "2" {
+            $script:BeginnerMode = $false
+            Write-Success "Experienced mode — skipping beginner tips."
+        }
+        default {
+            $script:BeginnerMode = $true
+            Write-Success "Beginner mode — extra tips will be shown throughout setup."
+        }
+    }
+}
+
+function Show-ArrOverview {
+    if (-not $script:BeginnerMode) {
+        return
+    }
+
+    Write-Banner
+    Write-Host "  WHAT IS THE ARR SUITE?" -ForegroundColor Magenta
+    Write-Host "  ----------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  The ARR suite is a collection of apps that work together" -ForegroundColor White
+    Write-Host "  to automatically find, download, and organize media:" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  +---------------+--------------------------------------------+" -ForegroundColor Cyan
+    Write-Host "  | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Service" -ForegroundColor Yellow -NoNewline
+    Write-Host "       | " -ForegroundColor Cyan -NoNewline
+    Write-Host "What it does" -ForegroundColor White -NoNewline
+    Write-Host "                              |" -ForegroundColor Cyan
+    Write-Host "  +---------------+--------------------------------------------+" -ForegroundColor Cyan
+    Write-Host "  | " -ForegroundColor Cyan -NoNewline
+    Write-Host "qBittorrent" -ForegroundColor Green -NoNewline
+    Write-Host "   | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Downloads files (through VPN for safety)" -ForegroundColor Gray -NoNewline
+    Write-Host "  |" -ForegroundColor Cyan
+    Write-Host "  | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Prowlarr" -ForegroundColor Green -NoNewline
+    Write-Host "      | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Searches torrent sites for content" -ForegroundColor Gray -NoNewline
+    Write-Host "       |" -ForegroundColor Cyan
+    Write-Host "  | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Sonarr" -ForegroundColor Green -NoNewline
+    Write-Host "        | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Finds & organizes TV shows automatically" -ForegroundColor Gray -NoNewline
+    Write-Host " |" -ForegroundColor Cyan
+    Write-Host "  | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Radarr" -ForegroundColor Green -NoNewline
+    Write-Host "        | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Finds & organizes movies automatically" -ForegroundColor Gray -NoNewline
+    Write-Host "   |" -ForegroundColor Cyan
+    Write-Host "  | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Jellyfin" -ForegroundColor Green -NoNewline
+    Write-Host "      | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Streams your media (like personal Netflix)" -ForegroundColor Gray -NoNewline
+    Write-Host "|" -ForegroundColor Cyan
+    Write-Host "  +---------------+--------------------------------------------+" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  How they connect:" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  You search in " -ForegroundColor Gray -NoNewline
+    Write-Host "Sonarr/Radarr" -ForegroundColor Green -NoNewline
+    Write-Host " -> " -ForegroundColor Gray -NoNewline
+    Write-Host "Prowlarr" -ForegroundColor Green -NoNewline
+    Write-Host " finds it -> " -ForegroundColor Gray -NoNewline
+    Write-Host "qBittorrent" -ForegroundColor Green -NoNewline
+    Write-Host " downloads it" -ForegroundColor Gray
+    Write-Host "  -> " -ForegroundColor Gray -NoNewline
+    Write-Host "Sonarr/Radarr" -ForegroundColor Green -NoNewline
+    Write-Host " organizes it -> " -ForegroundColor Gray -NoNewline
+    Write-Host "Jellyfin" -ForegroundColor Green -NoNewline
+    Write-Host " streams it to your devices" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  All torrent traffic is routed through your VPN for privacy." -ForegroundColor Yellow
+
+    Press-Enter
 }
 
 # --- Pre-Flight Checks ---
@@ -679,6 +799,9 @@ function Start-PrivacyBox {
 # --- Guided Setup ---
 function Show-SetupGuide {
     # --- qBittorrent Setup ---
+    Show-BeginnerTip -Title "What is qBittorrent?" -Body "qBittorrent is a download client for torrents. Think
+of it like a download manager. All of its traffic goes
+through the VPN tunnel so your ISP never sees it."
     Write-Banner
     Write-Host "  SETUP GUIDE: qBittorrent (Step 1 of 4)" -ForegroundColor Magenta
     Write-Host "  --------------------------------------" -ForegroundColor DarkGray
@@ -723,6 +846,9 @@ function Show-SetupGuide {
     Press-Enter
 
     # --- Prowlarr Setup ---
+    Show-BeginnerTip -Title "What is Prowlarr?" -Body "Prowlarr is a search engine that looks across many
+torrent sites at once. It connects to Sonarr and Radarr
+so they can automatically find the content you want."
     Write-Banner
     Write-Host "  SETUP GUIDE: Prowlarr (Step 2 of 4)" -ForegroundColor Magenta
     Write-Host "  -----------------------------------" -ForegroundColor DarkGray
@@ -749,6 +875,9 @@ function Show-SetupGuide {
     Press-Enter
 
     # --- Sonarr Setup ---
+    Show-BeginnerTip -Title "What is Sonarr?" -Body "Sonarr automates TV show management. Tell it what shows
+you want, and it will find episodes, download them via
+qBittorrent, and organize them into neat folders."
     Write-Banner
     Write-Host "  SETUP GUIDE: Sonarr (Step 3 of 4)" -ForegroundColor Magenta
     Write-Host "  ---------------------------------" -ForegroundColor DarkGray
@@ -786,6 +915,9 @@ function Show-SetupGuide {
     Press-Enter
 
     # --- Radarr Setup ---
+    Show-BeginnerTip -Title "What is Radarr?" -Body "Radarr is just like Sonarr, but for movies. Tell it what
+movies you want, and it will find, download, and organize
+them automatically."
     Write-Banner
     Write-Host "  SETUP GUIDE: Radarr (Step 4 of 4)" -ForegroundColor Magenta
     Write-Host "  ---------------------------------" -ForegroundColor DarkGray
@@ -853,6 +985,9 @@ function Show-SetupGuide {
     Press-Enter
 
     # --- Jellyfin Setup ---
+    Show-BeginnerTip -Title "What is Jellyfin?" -Body "Jellyfin is your personal Netflix. It streams your movies
+and TV shows to any device — phone, tablet, smart TV, or
+browser. It's completely free and open-source."
     Write-Banner
     Write-Host "  SETUP GUIDE: Jellyfin (Media Server)" -ForegroundColor Magenta
     Write-Host "  ------------------------------------" -ForegroundColor DarkGray
@@ -1217,7 +1352,15 @@ function Main {
     Write-Success "Pre-flight checks passed!"
     Press-Enter
 
+    # Experience level selection
+    Get-ExperienceLevel
+    Show-ArrOverview
+
     # Collect configuration
+    Show-BeginnerTip -Title "Why do you need a VPN?" -Body "Your ISP (internet provider) can see everything you
+download. A VPN encrypts your traffic so they can't.
+Only the torrent containers use the VPN — your normal
+browsing stays on your regular connection."
     $vpn = Get-VPNProvider
     Write-Host ""
     Write-Success "Selected: $($vpn.Name)"

@@ -15,6 +15,7 @@
 
 VERSION="1.0.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BEGINNER_MODE=false
 
 # --- WSL2 Detection ---
 IS_WSL=false
@@ -93,6 +94,85 @@ open_url() {
     else
         xdg-open "$url" 2>/dev/null || echo -e "  ${CYAN}Open: $url${NC}"
     fi
+}
+
+# --- Beginner Mode ---
+show_beginner_tip() {
+    local title="$1"
+    local body="$2"
+
+    if [[ "$BEGINNER_MODE" != "true" ]]; then
+        return
+    fi
+
+    echo ""
+    echo -e "  ${CYAN}┌──────────────────────────────────────────────────┐${NC}"
+    echo -e "  ${CYAN}│${NC}  ${WHITE}💡 $title${NC}"
+    echo -e "  ${CYAN}├──────────────────────────────────────────────────┤${NC}"
+    while IFS= read -r line; do
+        echo -e "  ${CYAN}│${NC}  ${GRAY}$line${NC}"
+    done <<< "$body"
+    echo -e "  ${CYAN}└──────────────────────────────────────────────────┘${NC}"
+    echo ""
+    echo -e "  ${DARKGRAY}Press ENTER to continue...${NC}"
+    read -r
+}
+
+get_experience_level() {
+    write_banner
+    echo -e "  ${MAGENTA}EXPERIENCE LEVEL${NC}"
+    echo -e "  ${DARKGRAY}----------------${NC}"
+    echo ""
+    echo -e "  ${WHITE}How familiar are you with the ARR suite?${NC}"
+    echo ""
+    echo -e "    ${GREEN}1. I'm brand new to ARR${NC}  ${GRAY}(show me extra explanations)${NC}"
+    echo -e "    ${CYAN}2. I'm familiar with ARR${NC} ${GRAY}(skip the intro tips)${NC}"
+    echo ""
+    echo -ne "  ${YELLOW}Select (1-2) [default: 1]: ${NC}"
+    read -r choice
+
+    case "$choice" in
+        2)
+            BEGINNER_MODE=false
+            write_success "Experienced mode — skipping beginner tips."
+            ;;
+        *)
+            BEGINNER_MODE=true
+            write_success "Beginner mode — extra tips will be shown throughout setup."
+            ;;
+    esac
+}
+
+show_arr_overview() {
+    if [[ "$BEGINNER_MODE" != "true" ]]; then
+        return
+    fi
+
+    write_banner
+    echo -e "  ${MAGENTA}WHAT IS THE ARR SUITE?${NC}"
+    echo -e "  ${DARKGRAY}----------------------${NC}"
+    echo ""
+    echo -e "  ${WHITE}The ARR suite is a collection of apps that work together${NC}"
+    echo -e "  ${WHITE}to automatically find, download, and organize media:${NC}"
+    echo ""
+    echo -e "  ${CYAN}┌─────────────┬──────────────────────────────────────────┐${NC}"
+    echo -e "  ${CYAN}│${NC} ${YELLOW}Service${NC}     ${CYAN}│${NC} ${WHITE}What it does${NC}                              ${CYAN}│${NC}"
+    echo -e "  ${CYAN}├─────────────┼──────────────────────────────────────────┤${NC}"
+    echo -e "  ${CYAN}│${NC} ${GREEN}qBittorrent${NC} ${CYAN}│${NC} ${GRAY}Downloads files (through VPN for safety)${NC}  ${CYAN}│${NC}"
+    echo -e "  ${CYAN}│${NC} ${GREEN}Prowlarr${NC}    ${CYAN}│${NC} ${GRAY}Searches torrent sites for content${NC}       ${CYAN}│${NC}"
+    echo -e "  ${CYAN}│${NC} ${GREEN}Sonarr${NC}      ${CYAN}│${NC} ${GRAY}Finds & organizes TV shows automatically${NC} ${CYAN}│${NC}"
+    echo -e "  ${CYAN}│${NC} ${GREEN}Radarr${NC}      ${CYAN}│${NC} ${GRAY}Finds & organizes movies automatically${NC}   ${CYAN}│${NC}"
+    echo -e "  ${CYAN}│${NC} ${GREEN}Jellyfin${NC}    ${CYAN}│${NC} ${GRAY}Streams your media (like personal Netflix)${NC}${CYAN}│${NC}"
+    echo -e "  ${CYAN}└─────────────┴──────────────────────────────────────────┘${NC}"
+    echo ""
+    echo -e "  ${WHITE}How they connect:${NC}"
+    echo ""
+    echo -e "  ${GRAY}You search in${NC} ${GREEN}Sonarr/Radarr${NC} ${GRAY}→${NC} ${GREEN}Prowlarr${NC} ${GRAY}finds it →${NC} ${GREEN}qBittorrent${NC} ${GRAY}downloads it${NC}"
+    echo -e "  ${GRAY}→${NC} ${GREEN}Sonarr/Radarr${NC} ${GRAY}organizes it →${NC} ${GREEN}Jellyfin${NC} ${GRAY}streams it to your devices${NC}"
+    echo ""
+    echo -e "  ${YELLOW}All torrent traffic is routed through your VPN for privacy.${NC}"
+
+    press_enter
 }
 
 # --- Pre-Flight Checks ---
@@ -474,6 +554,10 @@ start_privacy_box() {
 # --- Setup Guide ---
 show_setup_guide() {
     # --- qBittorrent Setup ---
+    show_beginner_tip "What is qBittorrent?" \
+"qBittorrent is a download client for torrents. Think
+of it like a download manager. All of its traffic goes
+through the VPN tunnel so your ISP never sees it."
     write_banner
     echo -e "  ${MAGENTA}SETUP GUIDE: qBittorrent (Step 1 of 4)${NC}"
     echo -e "  ${DARKGRAY}--------------------------------------${NC}"
@@ -513,6 +597,10 @@ show_setup_guide() {
     press_enter
 
     # --- Prowlarr Setup ---
+    show_beginner_tip "What is Prowlarr?" \
+"Prowlarr is a search engine that looks across many
+torrent sites at once. It connects to Sonarr and Radarr
+so they can automatically find the content you want."
     write_banner
     echo -e "  ${MAGENTA}SETUP GUIDE: Prowlarr (Step 2 of 4)${NC}"
     echo -e "  ${DARKGRAY}-----------------------------------${NC}"
@@ -537,6 +625,10 @@ show_setup_guide() {
     press_enter
 
     # --- Sonarr Setup ---
+    show_beginner_tip "What is Sonarr?" \
+"Sonarr automates TV show management. Tell it what shows
+you want, and it will find episodes, download them via
+qBittorrent, and organize them into neat folders."
     write_banner
     echo -e "  ${MAGENTA}SETUP GUIDE: Sonarr (Step 3 of 4)${NC}"
     echo -e "  ${DARKGRAY}---------------------------------${NC}"
@@ -569,6 +661,10 @@ show_setup_guide() {
     press_enter
 
     # --- Radarr Setup ---
+    show_beginner_tip "What is Radarr?" \
+"Radarr is just like Sonarr, but for movies. Tell it what
+movies you want, and it will find, download, and organize
+them automatically."
     write_banner
     echo -e "  ${MAGENTA}SETUP GUIDE: Radarr (Step 4 of 4)${NC}"
     echo -e "  ${DARKGRAY}---------------------------------${NC}"
@@ -627,6 +723,10 @@ show_setup_guide() {
     press_enter
 
     # --- Jellyfin Setup ---
+    show_beginner_tip "What is Jellyfin?" \
+"Jellyfin is your personal Netflix. It streams your movies
+and TV shows to any device — phone, tablet, smart TV, or
+browser. It's completely free and open-source."
     write_banner
     echo -e "  ${MAGENTA}SETUP GUIDE: Jellyfin (Media Server)${NC}"
     echo -e "  ${DARKGRAY}------------------------------------${NC}"
@@ -941,7 +1041,16 @@ main() {
     write_success "Pre-flight checks passed!"
     press_enter
 
+    # Experience level selection
+    get_experience_level
+    show_arr_overview
+
     # Collect configuration
+    show_beginner_tip "Why do you need a VPN?" \
+"Your ISP (internet provider) can see everything you
+download. A VPN encrypts your traffic so they can't.
+Only the torrent containers use the VPN — your normal
+browsing stays on your regular connection."
     get_vpn_provider
     press_enter
 
