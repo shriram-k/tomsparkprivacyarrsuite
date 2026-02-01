@@ -422,6 +422,8 @@ get_vpn_credentials() {
         fi
 
         echo ""
+        echo -e "  ${DARKGRAY}TIP: Ctrl+V may not paste here. Use right-click or Shift+Insert to paste.${NC}"
+        echo ""
         echo -ne "  ${YELLOW}Enter your WireGuard Private Key: ${NC}"
         read -r WIREGUARD_PRIVATE_KEY
 
@@ -468,6 +470,8 @@ get_vpn_credentials() {
             fi
         fi
 
+        echo ""
+        echo -e "  ${DARKGRAY}TIP: Ctrl+V may not paste here. Use right-click or Shift+Insert to paste.${NC}"
         echo ""
         echo -ne "  ${YELLOW}Enter your Service Username: ${NC}"
         read -r VPN_USERNAME
@@ -1014,6 +1018,8 @@ setup_notifiarr() {
     fi
 
     echo ""
+    echo -e "  ${DARKGRAY}TIP: Ctrl+V may not paste here. Use right-click or Shift+Insert to paste.${NC}"
+    echo ""
     echo -ne "  ${YELLOW}Paste your Notifiarr API Key: ${NC}"
     read -r NOTIFIARR_API_KEY
 
@@ -1153,10 +1159,7 @@ download. A VPN encrypts your traffic so they can't.
 Only the torrent containers use the VPN — your normal
 browsing stays on your regular connection."
     get_vpn_provider
-    press_enter
-
     get_vpn_protocol
-    press_enter
 
     if ! get_vpn_credentials; then
         exit 1
