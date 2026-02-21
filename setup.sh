@@ -615,12 +615,12 @@ start_privacy_box() {
 
     write_step "1" "Pulling Docker images (this may take a few minutes on first run)..."
     echo ""
-    docker compose pull 2>&1 | sed 's/^/      /'
+    docker compose pull </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_step "2" "Starting containers..."
     echo ""
-    docker compose up -d 2>&1 | sed 's/^/      /'
+    docker compose up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_step "3" "Waiting for VPN to connect..."
@@ -645,7 +645,7 @@ start_privacy_box() {
     echo ""
 
     if [[ "$connected" == "true" ]]; then
-        ip=$(docker logs gluetun 2>&1 | grep "Public IP address is" | tail -1 | sed 's/.*Public IP address is //' | cut -d' ' -f1)
+        ip=$(docker logs gluetun </dev/null 2>&1 | grep "Public IP address is" | tail -1 | sed 's/.*Public IP address is //' | cut -d' ' -f1)
         if [[ -n "$ip" ]]; then
             write_success "VPN Connected! Your IP: $ip"
         else
@@ -655,7 +655,7 @@ start_privacy_box() {
     else
         write_error "VPN connection timed out. Checking logs..."
         echo ""
-        docker logs gluetun 2>&1 | grep -E "AUTH_FAILED|error|Error" | tail -5 | sed 's/^/      /'
+        docker logs gluetun </dev/null 2>&1 | grep -E "AUTH_FAILED|error|Error" | tail -5 | sed 's/^/      /'
         return 1
     fi
 }
@@ -1061,7 +1061,7 @@ setup_notifiarr() {
 
     write_step "1" "Starting Notifiarr container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile notifications up -d 2>&1 | sed 's/^/      /'
+    docker compose --profile notifications up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "Notifiarr is running!"
@@ -1135,7 +1135,7 @@ setup_flaresolverr() {
     echo ""
     write_step "1" "Starting FlareSolverr container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile flaresolverr up -d 2>&1 | sed 's/^/      /'
+    docker compose --profile flaresolverr up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "FlareSolverr is running!"
@@ -1176,7 +1176,7 @@ setup_sabnzbd() {
     echo ""
     write_step "1" "Starting SABnzbd container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile sabnzbd up -d 2>&1 | sed 's/^/      /'
+    docker compose --profile sabnzbd up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "SABnzbd is running!"
@@ -1235,7 +1235,7 @@ setup_lidarr() {
     echo ""
     write_step "1" "Starting Lidarr container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile lidarr up -d 2>&1 | sed 's/^/      /'
+    docker compose --profile lidarr up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "Lidarr is running!"
