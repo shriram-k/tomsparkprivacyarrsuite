@@ -37,9 +37,10 @@ services:
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY:-}
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES:-}
       - SERVER_COUNTRIES=${SERVER_COUNTRIES}
+      - FREE_ONLY=${FREE_ONLY:-off}
       - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16,10.0.0.0/8,172.16.0.0/12
     volumes:
-      - ${ROOT_DIR}/config/gluetun:/gluetun
+      - ./config/gluetun:/gluetun
     networks:
       - default
       - internal
@@ -54,8 +55,8 @@ services:
       - TZ=${TZ}
       - WEBUI_PORT=8080
     volumes:
-      - ${ROOT_DIR}/config/qbittorrent:/config
-      - ${ROOT_DIR}/media/downloads:/data/downloads
+      - ./config/qbittorrent:/config
+      - ./media/downloads:/data/downloads
     network_mode: service:gluetun
     depends_on:
       - gluetun
@@ -69,7 +70,7 @@ services:
       - PGID=1000
       - TZ=${TZ}
     volumes:
-      - ${ROOT_DIR}/config/prowlarr:/config
+      - ./config/prowlarr:/config
     network_mode: service:gluetun
     depends_on:
       - gluetun
@@ -83,9 +84,9 @@ services:
       - PGID=1000
       - TZ=${TZ}
     volumes:
-      - ${ROOT_DIR}/config/sonarr:/config
-      - ${ROOT_DIR}/media:/data/media
-      - ${ROOT_DIR}/media/downloads:/data/downloads
+      - ./config/sonarr:/config
+      - ./media:/data/media
+      - ./media/downloads:/data/downloads
     network_mode: service:gluetun
     depends_on:
       - gluetun
@@ -99,9 +100,9 @@ services:
       - PGID=1000
       - TZ=${TZ}
     volumes:
-      - ${ROOT_DIR}/config/radarr:/config
-      - ${ROOT_DIR}/media:/data/media
-      - ${ROOT_DIR}/media/downloads:/data/downloads
+      - ./config/radarr:/config
+      - ./media:/data/media
+      - ./media/downloads:/data/downloads
     network_mode: service:gluetun
     depends_on:
       - gluetun
@@ -118,10 +119,10 @@ services:
     ports:
       - 8096:8096   # Jellyfin Web UI
     volumes:
-      - ${ROOT_DIR}/config/jellyfin:/config
-      - ${ROOT_DIR}/media/tv:/data/tvshows
-      - ${ROOT_DIR}/media/movies:/data/movies
-      - ${ROOT_DIR}/media/music:/data/music
+      - ./config/jellyfin:/config
+      - ./media/tv:/data/tvshows
+      - ./media/movies:/data/movies
+      - ./media/music:/data/music
     restart: always
 
   # --- SABnzbd (Optional - enable with: docker compose --profile sabnzbd up -d) ---
@@ -137,8 +138,8 @@ services:
     ports:
       - 8085:8080   # SABnzbd Web UI
     volumes:
-      - ${ROOT_DIR}/config/sabnzbd:/config
-      - ${ROOT_DIR}/media/downloads:/data/downloads
+      - ./config/sabnzbd:/config
+      - ./media/downloads:/data/downloads
     restart: always
 
   # --- Lidarr (Optional - enable with: docker compose --profile lidarr up -d) ---
@@ -152,9 +153,9 @@ services:
       - PGID=1000
       - TZ=${TZ}
     volumes:
-      - ${ROOT_DIR}/config/lidarr:/config
-      - ${ROOT_DIR}/media:/data/media
-      - ${ROOT_DIR}/media/downloads:/data/downloads
+      - ./config/lidarr:/config
+      - ./media:/data/media
+      - ./media/downloads:/data/downloads
     network_mode: service:gluetun
     depends_on:
       - gluetun
@@ -173,7 +174,7 @@ services:
     ports:
       - 5454:5454   # Notifiarr Web UI
     volumes:
-      - ${ROOT_DIR}/config/notifiarr:/config
+      - ./config/notifiarr:/config
       - /var/run/utmp:/var/run/utmp:ro
     restart: always
 
