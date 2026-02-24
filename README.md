@@ -122,6 +122,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 - **FlareSolverr support** - Optional Cloudflare bypass for protected indexers
 - **Usenet support** - Optional SABnzbd for Usenet downloads
 - **Music management** - Optional Lidarr for automatic music organization
+- **Unified dashboard** - Optional Homarr homepage for one-click app access
 - **Pre-configured ports** - Avoids common port conflicts
 - **Guided configuration** - Step-by-step instructions for connecting all apps
 - **Safe defaults** - Credentials properly quoted, secure settings enabled
@@ -137,6 +138,7 @@ curl -fsSL https://raw.githubusercontent.com/loponai/tomsparkprivacyarrsuite/mai
 | Jellyfin | `localhost:8096` | Media server (watch on any device!) |
 | SABnzbd | `localhost:8085` | Usenet download client (optional) |
 | Lidarr | `localhost:8686` | Music manager (optional) |
+| Homarr | `localhost:7575` | Unified dashboard (optional) |
 | Notifiarr | `localhost:5454` | Discord notifications (optional) |
 | FlareSolverr | `localhost:8191` | Cloudflare bypass proxy (optional) |
 | Gluetun | - | VPN tunnel (NordVPN/ProtonVPN/Surfshark + other providers) |
@@ -202,6 +204,9 @@ docker compose --profile sabnzbd up -d
 
 # Enable Lidarr (music management)
 docker compose --profile lidarr up -d
+
+# Enable Homarr (unified dashboard)
+docker compose --profile homarr up -d
 ```
 
 ## Discord Notifications (Notifiarr)
@@ -312,6 +317,28 @@ Prowlarr will now automatically route requests through FlareSolverr when indexer
 
 6. **Add music library in Jellyfin:** Content type "Music", folder `/data/music`
 
+## Unified Dashboard (Homarr)
+
+[Homarr](https://homarr.dev/) gives you a single homepage with tiles for all your apps (Sonarr, Radarr, Prowlarr, qBittorrent, Jellyfin, etc.).
+
+**The setup script will ask if you want this at the end.** If you skipped it or want to add it later:
+
+### Enable Homarr
+
+1. **Start Homarr:**
+   ```bash
+   docker compose --profile homarr up -d
+   ```
+
+2. **Open Homarr** at `http://localhost:7575`
+
+3. **Create your account**, then add app tiles using:
+   - Sonarr: `http://localhost:8989`
+   - Radarr: `http://localhost:7878`
+   - Prowlarr: `http://localhost:8181`
+   - qBittorrent: `http://localhost:8080`
+   - Jellyfin: `http://localhost:8096`
+
 ## Troubleshooting
 
 ### AUTH_FAILED Error (OpenVPN)
@@ -410,6 +437,7 @@ Questions? Join the **[Tom Spark Discord](https://discord.gg/uPdRcKxEVS)** for s
 - [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) - Cloudflare bypass proxy
 - [SABnzbd](https://sabnzbd.org/) - Usenet download client
 - [Lidarr](https://lidarr.audio/) - Music manager
+- [Homarr](https://homarr.dev/) - Unified dashboard
 - Tom Spark - Original tutorial
 
 ---

@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # PRIVACY BOX - One-Click Media Server Setup
 # Created by Tom Spark | https://youtube.com/@TomSparkReviews
 #
@@ -204,6 +204,11 @@ function Show-ArrOverview {
     Write-Host "        | " -ForegroundColor Cyan -NoNewline
     Write-Host "Finds & organizes music automatically" -ForegroundColor Gray -NoNewline
     Write-Host "   |" -ForegroundColor Cyan
+    Write-Host "  | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Homarr" -ForegroundColor Green -NoNewline
+    Write-Host "        | " -ForegroundColor Cyan -NoNewline
+    Write-Host "Dashboard to access all your apps in one place" -ForegroundColor Gray -NoNewline
+    Write-Host "|" -ForegroundColor Cyan
     Write-Host "  +---------------+--------------------------------------------+" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  How they connect:" -ForegroundColor White
@@ -875,6 +880,22 @@ services:
       - gluetun
     restart: always
 
+  # --- Homarr (Optional - enable with: docker compose --profile homarr up -d) ---
+  homarr:
+    image: lscr.io/linuxserver/homarr:latest
+    container_name: homarr
+    profiles:
+      - homarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 7575:7575   # Homarr Dashboard
+    volumes:
+      - ${ROOT_DIR}/config/homarr:/config
+    restart: always
+
   # --- Notifications (Optional - enable with: docker compose --profile notifications up -d) ---
   notifiarr:
     image: golift/notifiarr
@@ -1328,6 +1349,11 @@ browser. It's completely free and open-source."
         Write-Host "    Lidarr:       http://localhost:8686" -ForegroundColor White -NoNewline
         Write-Host " (Music Manager)" -ForegroundColor Gray
     }
+    $homarrRunning = docker ps --format '{{.Names}}' 2>$null | Select-String '^homarr$'
+    if ($homarrRunning) {
+        Write-Host "    Homarr:       http://localhost:7575" -ForegroundColor White -NoNewline
+        Write-Host " (Unified Dashboard)" -ForegroundColor Gray
+    }
     Write-Host ""
     Write-Host "  Your media folder:" -ForegroundColor Yellow
     Write-Host "    $env:USERPROFILE\Desktop\PrivacyServer\media\" -ForegroundColor Gray
@@ -1694,6 +1720,65 @@ function Setup-Lidarr {
     Press-Enter
 }
 
+# --- Bonus: Homarr Setup ---
+function Setup-Homarr {
+    param([string]$Path)
+
+    Write-Banner
+    Write-Host "  BONUS: Unified Dashboard with Homarr" -ForegroundColor Magenta
+    Write-Host "  ------------------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  Homarr gives you one homepage for your media stack." -ForegroundColor White
+    Write-Host "  Add quick tiles for Sonarr, Radarr, Prowlarr, Jellyfin, and more." -ForegroundColor White
+    Write-Host ""
+
+    if (-not (Ask-YesNo "Would you like to enable Homarr dashboard (optional)?")) {
+        Write-Host ""
+        Write-Info "Skipping Homarr setup. You can enable it later!"
+        Write-Host ""
+        Write-Host "  To enable later, run:" -ForegroundColor Gray
+        Write-Host "    docker compose --profile homarr up -d" -ForegroundColor Cyan
+        return
+    }
+
+    Write-Host ""
+    Write-Step "1" "Starting Homarr container..."
+    Push-Location $Path
+    docker compose --profile homarr up -d 2>&1 | ForEach-Object { Write-Host "      $_" -ForegroundColor DarkGray }
+    Pop-Location
+
+    Write-Host ""
+    Write-Success "Homarr is running!"
+
+    Press-Enter
+
+    Write-Banner
+    Write-Host "  Configure Homarr" -ForegroundColor Magenta
+    Write-Host "  ----------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  Press ENTER to open Homarr in your browser..." -ForegroundColor Yellow
+    Read-Host | Out-Null
+    Start-Process "http://localhost:7575"
+    Write-Host ""
+    Write-Host "  1. Create your Homarr account when prompted" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  2. Add your app tiles:" -ForegroundColor Yellow
+    Write-Host "     - Sonarr: " -ForegroundColor White -NoNewline
+    Write-Host "http://localhost:8989" -ForegroundColor Cyan
+    Write-Host "     - Radarr: " -ForegroundColor White -NoNewline
+    Write-Host "http://localhost:7878" -ForegroundColor Cyan
+    Write-Host "     - Prowlarr: " -ForegroundColor White -NoNewline
+    Write-Host "http://localhost:8181" -ForegroundColor Cyan
+    Write-Host "     - qBittorrent: " -ForegroundColor White -NoNewline
+    Write-Host "http://localhost:8080" -ForegroundColor Cyan
+    Write-Host "     - Jellyfin: " -ForegroundColor White -NoNewline
+    Write-Host "http://localhost:8096" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  You now have a single dashboard for your stack!" -ForegroundColor Green
+
+    Press-Enter
+}
+
 # --- Main Execution ---
 function Main {
     Write-Banner
@@ -1799,6 +1884,7 @@ browsing stays on your regular connection."
         Setup-FlareSolverr -Path $InstallPath
         Setup-SABnzbd -Path $InstallPath
         Setup-Lidarr -Path $InstallPath
+        Setup-Homarr -Path $InstallPath
     } else {
         Write-Host ""
         Write-Error-Custom "Setup failed. Please check your VPN credentials."

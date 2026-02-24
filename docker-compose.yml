@@ -161,6 +161,22 @@ services:
       - gluetun
     restart: always
 
+  # --- Homarr (Optional - enable with: docker compose --profile homarr up -d) ---
+  homarr:
+    image: lscr.io/linuxserver/homarr:latest
+    container_name: homarr
+    profiles:
+      - homarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 7575:7575   # Homarr Dashboard
+    volumes:
+      - ./config/homarr:/config
+    restart: always
+
   # --- Notifications (Optional - enable with: docker compose --profile notifications up -d) ---
   notifiarr:
     image: golift/notifiarr

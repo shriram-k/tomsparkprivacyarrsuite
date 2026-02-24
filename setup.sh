@@ -168,6 +168,7 @@ show_arr_overview() {
     echo -e "  ${CYAN}│${NC} ${YELLOW}Optional:${NC}   ${CYAN}│${NC}                                          ${CYAN}│${NC}"
     echo -e "  ${CYAN}│${NC} ${GREEN}SABnzbd${NC}     ${CYAN}│${NC} ${GRAY}Downloads from Usenet (alternative to torrents)${NC}${CYAN}│${NC}"
     echo -e "  ${CYAN}│${NC} ${GREEN}Lidarr${NC}      ${CYAN}│${NC} ${GRAY}Finds & organizes music automatically${NC}   ${CYAN}│${NC}"
+    echo -e "  ${CYAN}│${NC} ${GREEN}Homarr${NC}      ${CYAN}│${NC} ${GRAY}Dashboard to access all your apps in one place${NC}${CYAN}│${NC}"
     echo -e "  ${CYAN}└─────────────┴──────────────────────────────────────────┘${NC}"
     echo ""
     echo -e "  ${WHITE}How they connect:${NC}"
@@ -1108,6 +1109,9 @@ browser. It's completely free and open-source."
     if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^lidarr$'; then
         echo -e "    ${WHITE}Lidarr:       http://localhost:8686${NC} ${GRAY}(Music Manager)${NC}"
     fi
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^homarr$'; then
+        echo -e "    ${WHITE}Homarr:       http://localhost:7575${NC} ${GRAY}(Unified Dashboard)${NC}"
+    fi
     echo ""
     echo -e "  ${YELLOW}Your media folder:${NC}"
     echo -e "    ${GRAY}${SCRIPT_DIR}/media/${NC}"
@@ -1431,6 +1435,57 @@ setup_lidarr() {
     press_enter
 }
 
+# --- Bonus: Homarr Setup ---
+setup_homarr() {
+    write_banner
+    echo -e "  ${MAGENTA}BONUS: Unified Dashboard with Homarr${NC}"
+    echo -e "  ${DARKGRAY}------------------------------------${NC}"
+    echo ""
+    echo -e "  ${WHITE}Homarr gives you one homepage for your media stack.${NC}"
+    echo -e "  ${WHITE}Add quick tiles for Sonarr, Radarr, Prowlarr, Jellyfin, and more.${NC}"
+    echo ""
+
+    if ! ask_yes_no "Would you like to enable Homarr dashboard (optional)?"; then
+        echo ""
+        write_info "Skipping Homarr setup. You can enable it later!"
+        echo ""
+        echo -e "  ${GRAY}To enable later, run:${NC}"
+        echo -e "    ${CYAN}docker compose --profile homarr up -d${NC}"
+        return 0
+    fi
+
+    echo ""
+    write_step "1" "Starting Homarr container..."
+    cd "$SCRIPT_DIR" || exit 1
+    docker compose --profile homarr up -d </dev/null 2>&1 | sed 's/^/      /'
+
+    echo ""
+    write_success "Homarr is running!"
+
+    press_enter
+
+    write_banner
+    echo -e "  ${MAGENTA}Configure Homarr${NC}"
+    echo -e "  ${DARKGRAY}----------------${NC}"
+    echo ""
+    echo -e "  ${YELLOW}Press ENTER to open Homarr in your browser...${NC}"
+    read -r
+    open_url "http://localhost:7575"
+    echo ""
+    echo -e "  ${WHITE}1. Create your Homarr account when prompted${NC}"
+    echo ""
+    echo -e "  ${YELLOW}2. Add your app tiles:${NC}"
+    echo -e "     ${WHITE}- Sonarr: ${CYAN}http://localhost:8989${NC}"
+    echo -e "     ${WHITE}- Radarr: ${CYAN}http://localhost:7878${NC}"
+    echo -e "     ${WHITE}- Prowlarr: ${CYAN}http://localhost:8181${NC}"
+    echo -e "     ${WHITE}- qBittorrent: ${CYAN}http://localhost:8080${NC}"
+    echo -e "     ${WHITE}- Jellyfin: ${CYAN}http://localhost:8096${NC}"
+    echo ""
+    echo -e "  ${GREEN}You now have a single dashboard for your stack!${NC}"
+
+    press_enter
+}
+
 # --- Main Execution ---
 main() {
     write_banner
@@ -1524,6 +1579,7 @@ browsing stays on your regular connection."
         setup_flaresolverr
         setup_sabnzbd
         setup_lidarr
+        setup_homarr
     else
         echo ""
         if [[ "$USE_VPN" == "true" ]]; then
