@@ -16,6 +16,7 @@
 VERSION="1.0.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BEGINNER_MODE=false
+USE_VPN=true
 
 # --- WSL2 Detection ---
 IS_WSL=false
@@ -232,11 +233,13 @@ get_vpn_provider() {
     echo -e "  ${WHITE}OTHER SUPPORTED VPNs:${NC}"
     echo ""
     echo -e "    ${GRAY}4. Other VPN provider${NC}"
+    echo -e "    ${RED}5. No VPN${NC} ${DARKGRAY}(not recommended)${NC}"
     echo ""
-    echo -ne "  ${YELLOW}Select (1-4) [default: 1]: ${NC}"
+    echo -ne "  ${YELLOW}Select (1-5) [default: 1]: ${NC}"
     read -r choice
 
     # Reset optional vars
+    USE_VPN=true
     VPN_AFFILIATE=""
     VPN_BONUS=""
     VPN_URL=""
@@ -258,6 +261,13 @@ get_vpn_provider() {
             ;;
         4)
             get_other_vpn_provider
+            ;;
+        5)
+            USE_VPN=false
+            VPN_PROVIDER="none"
+            VPN_NAME="No VPN"
+            VPN_TYPE="none"
+            SUPPORTS_WIREGUARD=false
             ;;
         *)
             VPN_PROVIDER="nordvpn"
@@ -365,6 +375,11 @@ get_other_vpn_provider() {
 
 # --- VPN Protocol Selection (ProtonVPN/Surfshark only) ---
 get_vpn_protocol() {
+    if [[ "$USE_VPN" != "true" ]]; then
+        VPN_TYPE="none"
+        return
+    fi
+
     if [[ "$SUPPORTS_WIREGUARD" != "true" ]]; then
         VPN_TYPE="openvpn"
         return
@@ -405,6 +420,19 @@ get_vpn_protocol() {
 
 # --- Credential Collection ---
 get_vpn_credentials() {
+    if [[ "$USE_VPN" != "true" ]]; then
+        write_banner
+        echo -e "  ${MAGENTA}STEP 2: VPN CREDENTIALS${NC}"
+        echo -e "  ${DARKGRAY}-----------------------${NC}"
+        echo ""
+        write_warning "VPN disabled. Traffic will use your regular internet connection."
+        VPN_USERNAME=""
+        VPN_PASSWORD=""
+        WIREGUARD_PRIVATE_KEY=""
+        WIREGUARD_ADDRESSES=""
+        return 0
+    fi
+
     write_banner
 
     if [[ "$VPN_TYPE" == "wireguard" ]]; then
@@ -580,6 +608,11 @@ get_vpn_credentials() {
 }
 
 get_server_country() {
+    if [[ "$USE_VPN" != "true" ]]; then
+        SERVER_COUNTRY="N/A"
+        return
+    fi
+
     write_banner
     echo -e "  ${MAGENTA}STEP 3: SERVER LOCATION${NC}"
     echo -e "  ${DARKGRAY}-----------------------${NC}"
@@ -655,7 +688,7 @@ create_env_file() {
 VPN_PROVIDER=${VPN_PROVIDER}
 
 # --- VPN PROTOCOL ---
-# Options: openvpn, wireguard
+# Options: none, openvpn, wireguard
 VPN_TYPE=${VPN_TYPE}
 
 # --- VPN CREDENTIALS ---
@@ -667,6 +700,14 @@ EOF
 # WireGuard Configuration
 WIREGUARD_PRIVATE_KEY="${WIREGUARD_PRIVATE_KEY}"
 WIREGUARD_ADDRESSES="${WIREGUARD_ADDRESSES}"
+EOF
+    elif [[ "$VPN_TYPE" == "none" ]]; then
+        cat >> "$SCRIPT_DIR/.env" << EOF
+# VPN disabled (no tunnel)
+VPN_USER=""
+VPN_PASSWORD=""
+WIREGUARD_PRIVATE_KEY=""
+WIREGUARD_ADDRESSES=""
 EOF
     else
         cat >> "$SCRIPT_DIR/.env" << EOF
@@ -698,15 +739,25 @@ start_privacy_box() {
     echo ""
 
     cd "$SCRIPT_DIR" || exit 1
+    local compose_file="docker-compose.yml"
+    if [[ "$USE_VPN" != "true" ]]; then
+        compose_file="docker-compose.no-vpn.yml"
+    fi
 
     write_step "1" "Pulling Docker images (this may take a few minutes on first run)..."
     echo ""
-    docker compose pull </dev/null 2>&1 | sed 's/^/      /'
+    docker compose -f "$compose_file" pull </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_step "2" "Starting containers..."
     echo ""
-    docker compose up -d </dev/null 2>&1 | sed 's/^/      /'
+    docker compose -f "$compose_file" up -d </dev/null 2>&1 | sed 's/^/      /'
+
+    if [[ "$USE_VPN" != "true" ]]; then
+        echo ""
+        write_success "Containers started without VPN."
+        return 0
+    fi
 
     echo ""
     write_step "3" "Waiting for VPN to connect..."
@@ -784,10 +835,14 @@ through the VPN tunnel so your ISP never sees it."
     echo -e "  ${YELLOW}After logging in, change your password:${NC}"
     echo -e "    ${GRAY}Tools > Options > Web UI > Password${NC}"
     echo ""
-    echo -e "  ${WHITE} VPN VERIFICATION ${NC}"
-    echo -e "  ${WHITE}Go to: Tools > Options > Advanced${NC}"
-    echo -e "  ${WHITE}Look for 'Network Interface' - it should say: ${GREEN}tun0${NC}"
-    echo -e "  ${GRAY}This proves your traffic is going through the VPN tunnel!${NC}"
+    if [[ "$USE_VPN" == "true" ]]; then
+        echo -e "  ${WHITE} VPN VERIFICATION ${NC}"
+        echo -e "  ${WHITE}Go to: Tools > Options > Advanced${NC}"
+        echo -e "  ${WHITE}Look for 'Network Interface' - it should say: ${GREEN}tun0${NC}"
+        echo -e "  ${GRAY}This proves your traffic is going through the VPN tunnel!${NC}"
+    else
+        echo -e "  ${YELLOW}VPN is disabled${NC} ${GRAY}- traffic is not tunneled.${NC}"
+    fi
 
     press_enter
 
@@ -1200,6 +1255,11 @@ setup_notifiarr() {
 
 # --- Bonus: FlareSolverr Setup ---
 setup_flaresolverr() {
+    local compose_file="docker-compose.yml"
+    if [[ "$USE_VPN" != "true" ]]; then
+        compose_file="docker-compose.no-vpn.yml"
+    fi
+
     write_banner
     echo -e "  ${MAGENTA}BONUS: Cloudflare Bypass with FlareSolverr${NC}"
     echo -e "  ${DARKGRAY}-------------------------------------------${NC}"
@@ -1214,14 +1274,14 @@ setup_flaresolverr() {
         write_info "Skipping FlareSolverr setup. You can enable it later!"
         echo ""
         echo -e "  ${GRAY}To enable later, run:${NC}"
-        echo -e "    ${CYAN}docker compose --profile flaresolverr up -d${NC}"
+        echo -e "    ${CYAN}docker compose -f ${compose_file} --profile flaresolverr up -d${NC}"
         return 0
     fi
 
     echo ""
     write_step "1" "Starting FlareSolverr container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile flaresolverr up -d </dev/null 2>&1 | sed 's/^/      /'
+    docker compose -f "$compose_file" --profile flaresolverr up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "FlareSolverr is running!"
@@ -1420,6 +1480,8 @@ browsing stays on your regular connection."
     if [[ "$VPN_TYPE" == "wireguard" ]]; then
         echo -e "  ${WHITE}WG Private Key:  $(echo "$WIREGUARD_PRIVATE_KEY" | head -c 10)...${NC}"
         echo -e "  ${WHITE}WG Address:      ${WIREGUARD_ADDRESSES}${NC}"
+    elif [[ "$VPN_TYPE" == "none" ]]; then
+        echo -e "  ${YELLOW}VPN Status:      Disabled${NC}"
     else
         echo -e "  ${WHITE}VPN Username:    ${VPN_USERNAME}${NC}"
         echo -e "  ${WHITE}VPN Password:    $(printf '*%.0s' $(seq 1 ${#VPN_PASSWORD}))${NC}"
@@ -1464,10 +1526,17 @@ browsing stays on your regular connection."
         setup_lidarr
     else
         echo ""
-        write_error "Setup failed. Please check your VPN credentials."
+        if [[ "$USE_VPN" == "true" ]]; then
+            write_error "Setup failed. Please check your VPN credentials."
+        else
+            write_error "Setup failed. Please check Docker logs."
+        fi
         echo ""
         echo -e "  ${YELLOW}Common fixes:${NC}"
-        if [[ "$VPN_TYPE" == "wireguard" ]]; then
+        if [[ "$USE_VPN" != "true" ]]; then
+            echo -e "    ${WHITE}1. Check for port conflicts on 8080/8181/8989/7878/8096${NC}"
+            echo -e "    ${WHITE}2. Run: ${CYAN}docker compose -f docker-compose.no-vpn.yml logs --tail=100${NC}"
+        elif [[ "$VPN_TYPE" == "wireguard" ]]; then
             echo -e "    ${WHITE}1. Make sure your WireGuard Private Key is correct${NC}"
             echo -e "    ${WHITE}2. Verify your WireGuard Address matches the config${NC}"
             if [[ -n "$VPN_URL" ]]; then

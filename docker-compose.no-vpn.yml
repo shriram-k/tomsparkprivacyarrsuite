@@ -1,0 +1,144 @@
+# ==========================================
+# TOM SPARK'S PRIVACY BOX (NO VPN MODE)
+# Created by Tom Spark | youtube.com/@TomSparkReviews
+# ==========================================
+
+services:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+      - WEBUI_PORT=8080
+    ports:
+      - 8080:8080
+    volumes:
+      - ./config/qbittorrent:/config
+      - ./media/downloads:/data/downloads
+    restart: always
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 8181:9696
+    volumes:
+      - ./config/prowlarr:/config
+    restart: always
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 8989:8989
+    volumes:
+      - ./config/sonarr:/config
+      - ./media:/data/media
+      - ./media/downloads:/data/downloads
+    restart: always
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 7878:7878
+    volumes:
+      - ./config/radarr:/config
+      - ./media:/data/media
+      - ./media/downloads:/data/downloads
+    restart: always
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 8096:8096
+    volumes:
+      - ./config/jellyfin:/config
+      - ./media/tv:/data/tvshows
+      - ./media/movies:/data/movies
+      - ./media/music:/data/music
+    restart: always
+
+  # --- SABnzbd (Optional - enable with: docker compose --profile sabnzbd up -d) ---
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    profiles:
+      - sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 8085:8080
+    volumes:
+      - ./config/sabnzbd:/config
+      - ./media/downloads:/data/downloads
+    restart: always
+
+  # --- Lidarr (Optional - enable with: docker compose --profile lidarr up -d) ---
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    profiles:
+      - lidarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    ports:
+      - 8686:8686
+    volumes:
+      - ./config/lidarr:/config
+      - ./media:/data/media
+      - ./media/downloads:/data/downloads
+    restart: always
+
+  # --- Notifications (Optional - enable with: docker compose --profile notifications up -d) ---
+  notifiarr:
+    image: golift/notifiarr
+    container_name: notifiarr
+    hostname: notifiarr
+    profiles:
+      - notifications
+    environment:
+      - DN_API_KEY=${NOTIFIARR_API_KEY}
+      - TZ=${TZ}
+    ports:
+      - 5454:5454
+    volumes:
+      - ./config/notifiarr:/config
+      - /var/run/utmp:/var/run/utmp:ro
+    restart: always
+
+  # --- FlareSolverr (Optional - enable with: docker compose --profile flaresolverr up -d) ---
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    profiles:
+      - flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+    ports:
+      - 8191:8191
+    restart: always
