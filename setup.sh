@@ -15,6 +15,16 @@
 
 VERSION="1.0.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# If run with sudo, keep data paths under the original user's home (not root).
+if [[ -n "$SUDO_USER" ]]; then
+    USER_HOME="$(eval echo "~$SUDO_USER")"
+    if [[ -n "$USER_HOME" && -d "$USER_HOME" ]]; then
+        HOME="$USER_HOME"
+        export HOME
+    fi
+fi
+
 DATA_ROOT="$HOME/PrivacyServer"
 CONFIG_ROOT="$DATA_ROOT/config"
 MEDIA_ROOT="$DATA_ROOT/media"
@@ -73,6 +83,17 @@ write_info() {
 
 write_warning() {
     echo -e "  ${YELLOW}[!]${NC} ${WHITE}$1${NC}"
+}
+
+show_sudo_notice() {
+    if [[ -z "$SUDO_USER" ]]; then
+        return
+    fi
+
+    echo ""
+    write_warning "Running with sudo detected."
+    write_info "Data and config will be saved under: $DATA_ROOT"
+    write_info "Original sudo user: $SUDO_USER"
 }
 
 press_enter() {
@@ -1529,6 +1550,7 @@ setup_homarr() {
 # --- Main Execution ---
 main() {
     write_banner
+    show_sudo_notice
 
     # Pre-flight checks
     if ! test_docker_installed; then
@@ -1570,6 +1592,7 @@ browsing stays on your regular connection."
     echo -e "  ${DARKGRAY}---------------------${NC}"
     echo ""
     echo -e "  ${WHITE}Install Path:    ${SCRIPT_DIR}${NC}"
+    echo -e "  ${WHITE}Data Path:       ${DATA_ROOT}${NC}"
     echo -e "  ${WHITE}VPN Provider:    ${VPN_NAME}${NC}"
     echo -e "  ${WHITE}VPN Protocol:    ${VPN_TYPE}${NC}"
     if [[ "$VPN_TYPE" == "wireguard" ]]; then
