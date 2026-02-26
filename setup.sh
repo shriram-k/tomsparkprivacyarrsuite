@@ -25,6 +25,15 @@ if [[ -n "$SUDO_USER" ]]; then
     fi
 fi
 
+# Use real invoking user IDs for LinuxServer containers.
+if [[ -n "$SUDO_USER" ]]; then
+    CONTAINER_UID="$(id -u "$SUDO_USER" 2>/dev/null || id -u)"
+    CONTAINER_GID="$(id -g "$SUDO_USER" 2>/dev/null || id -g)"
+else
+    CONTAINER_UID="$(id -u)"
+    CONTAINER_GID="$(id -g)"
+fi
+
 DATA_ROOT="$HOME/PrivacyServer"
 CONFIG_ROOT="$DATA_ROOT/config"
 MEDIA_ROOT="$DATA_ROOT/media"
@@ -94,6 +103,7 @@ show_sudo_notice() {
     write_warning "Running with sudo detected."
     write_info "Data and config will be saved under: $DATA_ROOT"
     write_info "Original sudo user: $SUDO_USER"
+    write_info "Container UID/GID will be: $CONTAINER_UID:$CONTAINER_GID"
 }
 
 press_enter() {
@@ -771,6 +781,8 @@ FREE_ONLY=${FREE_ONLY}
 # --- SYSTEM SETTINGS ---
 TZ=${TIMEZONE}
 ROOT_DIR=.
+PUID=${CONTAINER_UID}
+PGID=${CONTAINER_GID}
 EOF
 }
 
@@ -1626,6 +1638,9 @@ browsing stays on your regular connection."
     mkdir -p "$MEDIA_ROOT/tv"
     mkdir -p "$MEDIA_ROOT/movies"
     mkdir -p "$MEDIA_ROOT/music"
+    if [[ $EUID -eq 0 ]]; then
+        chown -R "${CONTAINER_UID}:${CONTAINER_GID}" "$DATA_ROOT" 2>/dev/null || true
+    fi
     write_success "Directories created"
 
     write_step "2" "Generating .env file..."
