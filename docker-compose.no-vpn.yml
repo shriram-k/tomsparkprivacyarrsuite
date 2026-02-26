@@ -115,7 +115,7 @@ services:
 
   # --- Homarr (Optional - enable with: docker compose --profile homarr up -d) ---
   homarr:
-    image: lscr.io/linuxserver/homarr:latest
+    image: ghcr.io/homarr-labs/homarr:latest
     container_name: homarr
     profiles:
       - homarr
