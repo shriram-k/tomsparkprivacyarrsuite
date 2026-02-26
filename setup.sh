@@ -1147,6 +1147,11 @@ browser. It's completely free and open-source."
 
 # --- Bonus: Notifiarr Setup ---
 setup_notifiarr() {
+    local compose_file="docker-compose.yml"
+    if [[ "$USE_VPN" != "true" ]]; then
+        compose_file="docker-compose.no-vpn.yml"
+    fi
+
     write_banner
     echo -e "  ${MAGENTA}BONUS: Discord Notifications with Notifiarr${NC}"
     echo -e "  ${DARKGRAY}--------------------------------------------${NC}"
@@ -1165,7 +1170,7 @@ setup_notifiarr() {
         write_info "Skipping Notifiarr setup. You can enable it later!"
         echo ""
         echo -e "  ${GRAY}To enable later, run:${NC}"
-        echo -e "    ${CYAN}docker compose --profile notifications up -d${NC}"
+        echo -e "    ${CYAN}docker compose -f ${compose_file} --profile notifications up -d${NC}"
         return 0
     fi
 
@@ -1206,7 +1211,7 @@ setup_notifiarr() {
 
     write_step "1" "Starting Notifiarr container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile notifications up -d </dev/null 2>&1 | sed 's/^/      /'
+    docker compose -f "$compose_file" --profile notifications up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "Notifiarr is running!"
@@ -1305,6 +1310,11 @@ setup_flaresolverr() {
 
 # --- Bonus: SABnzbd Setup ---
 setup_sabnzbd() {
+    local compose_file="docker-compose.yml"
+    if [[ "$USE_VPN" != "true" ]]; then
+        compose_file="docker-compose.no-vpn.yml"
+    fi
+
     write_banner
     echo -e "  ${MAGENTA}BONUS: Usenet Downloads with SABnzbd${NC}"
     echo -e "  ${DARKGRAY}-------------------------------------${NC}"
@@ -1319,14 +1329,14 @@ setup_sabnzbd() {
         write_info "Skipping SABnzbd setup. You can enable it later!"
         echo ""
         echo -e "  ${GRAY}To enable later, run:${NC}"
-        echo -e "    ${CYAN}docker compose --profile sabnzbd up -d${NC}"
+        echo -e "    ${CYAN}docker compose -f ${compose_file} --profile sabnzbd up -d${NC}"
         return 0
     fi
 
     echo ""
     write_step "1" "Starting SABnzbd container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile sabnzbd up -d </dev/null 2>&1 | sed 's/^/      /'
+    docker compose -f "$compose_file" --profile sabnzbd up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "SABnzbd is running!"
@@ -1364,6 +1374,11 @@ setup_sabnzbd() {
 
 # --- Bonus: Lidarr Setup ---
 setup_lidarr() {
+    local compose_file="docker-compose.yml"
+    if [[ "$USE_VPN" != "true" ]]; then
+        compose_file="docker-compose.no-vpn.yml"
+    fi
+
     write_banner
     echo -e "  ${MAGENTA}BONUS: Music Management with Lidarr${NC}"
     echo -e "  ${DARKGRAY}------------------------------------${NC}"
@@ -1378,14 +1393,14 @@ setup_lidarr() {
         write_info "Skipping Lidarr setup. You can enable it later!"
         echo ""
         echo -e "  ${GRAY}To enable later, run:${NC}"
-        echo -e "    ${CYAN}docker compose --profile lidarr up -d${NC}"
+        echo -e "    ${CYAN}docker compose -f ${compose_file} --profile lidarr up -d${NC}"
         return 0
     fi
 
     echo ""
     write_step "1" "Starting Lidarr container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile lidarr up -d </dev/null 2>&1 | sed 's/^/      /'
+    docker compose -f "$compose_file" --profile lidarr up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "Lidarr is running!"
@@ -1437,6 +1452,11 @@ setup_lidarr() {
 
 # --- Bonus: Homarr Setup ---
 setup_homarr() {
+    local compose_file="docker-compose.yml"
+    if [[ "$USE_VPN" != "true" ]]; then
+        compose_file="docker-compose.no-vpn.yml"
+    fi
+
     write_banner
     echo -e "  ${MAGENTA}BONUS: Unified Dashboard with Homarr${NC}"
     echo -e "  ${DARKGRAY}------------------------------------${NC}"
@@ -1450,14 +1470,14 @@ setup_homarr() {
         write_info "Skipping Homarr setup. You can enable it later!"
         echo ""
         echo -e "  ${GRAY}To enable later, run:${NC}"
-        echo -e "    ${CYAN}docker compose --profile homarr up -d${NC}"
+        echo -e "    ${CYAN}docker compose -f ${compose_file} --profile homarr up -d${NC}"
         return 0
     fi
 
     echo ""
     write_step "1" "Starting Homarr container..."
     cd "$SCRIPT_DIR" || exit 1
-    docker compose --profile homarr up -d </dev/null 2>&1 | sed 's/^/      /'
+    docker compose -f "$compose_file" --profile homarr up -d </dev/null 2>&1 | sed 's/^/      /'
 
     echo ""
     write_success "Homarr is running!"
