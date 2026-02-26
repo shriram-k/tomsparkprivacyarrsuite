@@ -15,8 +15,8 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./config/qbittorrent:/config
-      - ./media/downloads:/data/downloads
+      - ${HOME}/PrivacyServer/config/qbittorrent:/config
+      - ${HOME}/PrivacyServer/media/downloads:/data/downloads
     restart: always
 
   prowlarr:
@@ -29,7 +29,7 @@ services:
     ports:
       - 8181:9696
     volumes:
-      - ./config/prowlarr:/config
+      - ${HOME}/PrivacyServer/config/prowlarr:/config
     restart: always
 
   sonarr:
@@ -42,9 +42,9 @@ services:
     ports:
       - 8989:8989
     volumes:
-      - ./config/sonarr:/config
-      - ./media:/data/media
-      - ./media/downloads:/data/downloads
+      - ${HOME}/PrivacyServer/config/sonarr:/config
+      - ${HOME}/PrivacyServer/media:/data/media
+      - ${HOME}/PrivacyServer/media/downloads:/data/downloads
     restart: always
 
   radarr:
@@ -57,9 +57,9 @@ services:
     ports:
       - 7878:7878
     volumes:
-      - ./config/radarr:/config
-      - ./media:/data/media
-      - ./media/downloads:/data/downloads
+      - ${HOME}/PrivacyServer/config/radarr:/config
+      - ${HOME}/PrivacyServer/media:/data/media
+      - ${HOME}/PrivacyServer/media/downloads:/data/downloads
     restart: always
 
   jellyfin:
@@ -72,10 +72,10 @@ services:
     ports:
       - 8096:8096
     volumes:
-      - ./config/jellyfin:/config
-      - ./media/tv:/data/tvshows
-      - ./media/movies:/data/movies
-      - ./media/music:/data/music
+      - ${HOME}/PrivacyServer/config/jellyfin:/config
+      - ${HOME}/PrivacyServer/media/tv:/data/tvshows
+      - ${HOME}/PrivacyServer/media/movies:/data/movies
+      - ${HOME}/PrivacyServer/media/music:/data/music
     restart: always
 
   # --- SABnzbd (Optional - enable with: docker compose --profile sabnzbd up -d) ---
@@ -91,8 +91,8 @@ services:
     ports:
       - 8085:8080
     volumes:
-      - ./config/sabnzbd:/config
-      - ./media/downloads:/data/downloads
+      - ${HOME}/PrivacyServer/config/sabnzbd:/config
+      - ${HOME}/PrivacyServer/media/downloads:/data/downloads
     restart: always
 
   # --- Lidarr (Optional - enable with: docker compose --profile lidarr up -d) ---
@@ -108,9 +108,9 @@ services:
     ports:
       - 8686:8686
     volumes:
-      - ./config/lidarr:/config
-      - ./media:/data/media
-      - ./media/downloads:/data/downloads
+      - ${HOME}/PrivacyServer/config/lidarr:/config
+      - ${HOME}/PrivacyServer/media:/data/media
+      - ${HOME}/PrivacyServer/media/downloads:/data/downloads
     restart: always
 
   # --- Homarr (Optional - enable with: docker compose --profile homarr up -d) ---
@@ -126,7 +126,7 @@ services:
     ports:
       - 7575:7575
     volumes:
-      - ./config/homarr:/config
+      - ${HOME}/PrivacyServer/config/homarr:/config
     restart: always
 
   # --- Notifications (Optional - enable with: docker compose --profile notifications up -d) ---
@@ -142,7 +142,7 @@ services:
     ports:
       - 5454:5454
     volumes:
-      - ./config/notifiarr:/config
+      - ${HOME}/PrivacyServer/config/notifiarr:/config
       - /var/run/utmp:/var/run/utmp:ro
     restart: always
 

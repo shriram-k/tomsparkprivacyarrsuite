@@ -15,6 +15,9 @@
 
 VERSION="1.0.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DATA_ROOT="$HOME/PrivacyServer"
+CONFIG_ROOT="$DATA_ROOT/config"
+MEDIA_ROOT="$DATA_ROOT/media"
 BEGINNER_MODE=false
 USE_VPN=true
 
@@ -95,6 +98,24 @@ open_url() {
     else
         xdg-open "$url" 2>/dev/null || echo -e "  ${CYAN}Open: $url${NC}"
     fi
+}
+
+open_service_step() {
+    local service_name="$1"
+    local service_url="$2"
+
+    echo ""
+    echo -e "  ${YELLOW}Press ENTER to open ${service_name}, or ESC to skip:${NC}"
+    local key
+    IFS= read -r -s -n 1 key
+
+    if [[ "$key" == $'\e' ]]; then
+        echo ""
+        write_info "Skipped opening ${service_name}. URL: ${service_url}"
+        return
+    fi
+
+    open_url "$service_url"
 }
 
 # --- Beginner Mode ---
@@ -798,6 +819,25 @@ start_privacy_box() {
     fi
 }
 
+# --- App Path Quick Check ---
+show_app_path_check() {
+    write_banner
+    echo -e "  ${MAGENTA}APP PATH QUICK CHECK${NC}"
+    echo -e "  ${DARKGRAY}--------------------${NC}"
+    echo ""
+    echo -e "  ${WHITE}Use these exact container paths in the app UIs:${NC}"
+    echo ""
+    echo -e "  ${YELLOW}qBittorrent (Save Path):${NC} ${CYAN}/data/downloads${NC}"
+    echo -e "  ${YELLOW}Sonarr (Root Folder):${NC}    ${CYAN}/data/media/tv${NC}"
+    echo -e "  ${YELLOW}Radarr (Root Folder):${NC}    ${CYAN}/data/media/movies${NC}"
+    echo -e "  ${YELLOW}Lidarr (Root Folder):${NC}    ${CYAN}/data/media/music${NC}"
+    echo ""
+    echo -e "  ${GRAY}Flow: qBittorrent downloads to /data/downloads, then${NC}"
+    echo -e "  ${GRAY}Sonarr/Radarr/Lidarr import into their own media folders.${NC}"
+
+    press_enter
+}
+
 # --- Setup Guide ---
 show_setup_guide() {
     # --- qBittorrent Setup ---
@@ -809,9 +849,7 @@ through the VPN tunnel so your ISP never sees it."
     echo -e "  ${MAGENTA}SETUP GUIDE: qBittorrent (Step 1 of 4)${NC}"
     echo -e "  ${DARKGRAY}--------------------------------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open qBittorrent in your browser...${NC}"
-    read -r
-    open_url "http://localhost:8080"
+    open_service_step "qBittorrent" "http://localhost:8080"
     echo ""
     echo -e "  ${YELLOW}Login:${NC}"
     echo -e "    ${WHITE}Username: ${CYAN}admin${NC}"
@@ -856,9 +894,7 @@ so they can automatically find the content you want."
     echo -e "  ${MAGENTA}SETUP GUIDE: Prowlarr (Step 2 of 4)${NC}"
     echo -e "  ${DARKGRAY}-----------------------------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Prowlarr in your browser...${NC}"
-    read -r
-    open_url "http://localhost:8181"
+    open_service_step "Prowlarr" "http://localhost:8181"
     echo ""
     echo -e "  ${WHITE} IMPORTANT ${NC}"
     echo ""
@@ -884,9 +920,7 @@ qBittorrent, and organize them into neat folders."
     echo -e "  ${MAGENTA}SETUP GUIDE: Sonarr (Step 3 of 4)${NC}"
     echo -e "  ${DARKGRAY}---------------------------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Sonarr in your browser...${NC}"
-    read -r
-    open_url "http://localhost:8989"
+    open_service_step "Sonarr" "http://localhost:8989"
     echo ""
     echo -e "  ${WHITE}1. Create your admin account when prompted${NC}"
     echo ""
@@ -920,9 +954,7 @@ them automatically."
     echo -e "  ${MAGENTA}SETUP GUIDE: Radarr (Step 4 of 4)${NC}"
     echo -e "  ${DARKGRAY}---------------------------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Radarr in your browser...${NC}"
-    read -r
-    open_url "http://localhost:7878"
+    open_service_step "Radarr" "http://localhost:7878"
     echo ""
     echo -e "  ${WHITE}1. Create your admin account when prompted${NC}"
     echo ""
@@ -951,9 +983,7 @@ them automatically."
     echo -e "  ${MAGENTA}FINAL STEP: Connect Prowlarr to Apps${NC}"
     echo -e "  ${DARKGRAY}------------------------------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Prowlarr in your browser...${NC}"
-    read -r
-    open_url "http://localhost:8181"
+    open_service_step "Prowlarr" "http://localhost:8181"
     echo ""
     echo -e "  ${YELLOW}Go to: Settings > Apps${NC}"
     echo ""
@@ -993,9 +1023,7 @@ browser. It's completely free and open-source."
     echo ""
     echo -e "  ${GRAY}Jellyfin is included in your Privacy Box. Watch your media on any device!${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Jellyfin in your browser...${NC}"
-    read -r
-    open_url "http://localhost:8096"
+    open_service_step "Jellyfin" "http://localhost:8096"
     echo ""
     echo -e "  ${WHITE} STEP 1: Initial Setup ${NC}"
     echo ""
@@ -1114,7 +1142,7 @@ browser. It's completely free and open-source."
     fi
     echo ""
     echo -e "  ${YELLOW}Your media folder:${NC}"
-    echo -e "    ${GRAY}${SCRIPT_DIR}/media/${NC}"
+    echo -e "    ${GRAY}${MEDIA_ROOT}/${NC}"
     echo ""
     echo -e "  ${GREEN}Your traffic is now secured through the VPN!${NC}"
     echo ""
@@ -1222,9 +1250,7 @@ setup_notifiarr() {
     echo -e "  ${MAGENTA}STEP 2: Configure Notifiarr${NC}"
     echo -e "  ${DARKGRAY}---------------------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Notifiarr in your browser...${NC}"
-    read -r
-    open_url "http://localhost:5454"
+    open_service_step "Notifiarr" "http://localhost:5454"
     echo ""
     echo -e "  ${WHITE} LOGIN ${NC}"
     echo -e "    ${WHITE}Username: ${CYAN}admin${NC}"
@@ -1347,9 +1373,7 @@ setup_sabnzbd() {
     echo -e "  ${MAGENTA}Configure SABnzbd${NC}"
     echo -e "  ${DARKGRAY}-----------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open SABnzbd in your browser...${NC}"
-    read -r
-    open_url "http://localhost:8085"
+    open_service_step "SABnzbd" "http://localhost:8085"
     echo ""
     echo -e "  ${WHITE}1. Follow the SABnzbd Quick-Start Wizard${NC}"
     echo ""
@@ -1411,9 +1435,7 @@ setup_lidarr() {
     echo -e "  ${MAGENTA}Configure Lidarr${NC}"
     echo -e "  ${DARKGRAY}----------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Lidarr in your browser...${NC}"
-    read -r
-    open_url "http://localhost:8686"
+    open_service_step "Lidarr" "http://localhost:8686"
     echo ""
     echo -e "  ${WHITE}1. Create your admin account when prompted${NC}"
     echo ""
@@ -1488,9 +1510,7 @@ setup_homarr() {
     echo -e "  ${MAGENTA}Configure Homarr${NC}"
     echo -e "  ${DARKGRAY}----------------${NC}"
     echo ""
-    echo -e "  ${YELLOW}Press ENTER to open Homarr in your browser...${NC}"
-    read -r
-    open_url "http://localhost:7575"
+    open_service_step "Homarr" "http://localhost:7575"
     echo ""
     echo -e "  ${WHITE}1. Create your Homarr account when prompted${NC}"
     echo ""
@@ -1578,11 +1598,11 @@ browsing stays on your regular connection."
     echo ""
 
     write_step "1" "Creating directories..."
-    mkdir -p "$SCRIPT_DIR/config"
-    mkdir -p "$SCRIPT_DIR/media/downloads"
-    mkdir -p "$SCRIPT_DIR/media/tv"
-    mkdir -p "$SCRIPT_DIR/media/movies"
-    mkdir -p "$SCRIPT_DIR/media/music"
+    mkdir -p "$CONFIG_ROOT"
+    mkdir -p "$MEDIA_ROOT/downloads"
+    mkdir -p "$MEDIA_ROOT/tv"
+    mkdir -p "$MEDIA_ROOT/movies"
+    mkdir -p "$MEDIA_ROOT/music"
     write_success "Directories created"
 
     write_step "2" "Generating .env file..."
@@ -1594,6 +1614,7 @@ browsing stays on your regular connection."
     # Launch
     if start_privacy_box; then
         press_enter
+        show_app_path_check
         show_setup_guide
         setup_notifiarr
         setup_flaresolverr
